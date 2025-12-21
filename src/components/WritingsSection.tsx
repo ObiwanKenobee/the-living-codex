@@ -1,8 +1,33 @@
+import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import { Search } from 'lucide-react';
 import FadeInSection from './FadeInSection';
 import { writings } from '@/data/writings';
 
 const WritingsSection = () => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeFilter, setActiveFilter] = useState<string | null>(null);
+
+  // Get unique types for filter buttons
+  const types = useMemo(() => {
+    const uniqueTypes = [...new Set(writings.map(w => w.type))];
+    return uniqueTypes.sort();
+  }, []);
+
+  // Filter writings based on search and type filter
+  const filteredWritings = useMemo(() => {
+    return writings.filter(entry => {
+      const matchesSearch = searchQuery === '' || 
+        entry.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        entry.excerpt.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        entry.type.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      const matchesFilter = activeFilter === null || entry.type === activeFilter;
+      
+      return matchesSearch && matchesFilter;
+    });
+  }, [searchQuery, activeFilter]);
+
   return (
     <section id="writings" className="section-spacing border-t divider">
       <div className="container-reading">
@@ -13,39 +38,91 @@ const WritingsSection = () => {
           <h2 className="text-3xl md:text-4xl font-light mb-8">
             Writings & Field Notes
           </h2>
-          <p className="prose-codex mb-12">
+          <p className="prose-codex mb-8">
             An evolving archive of essays, observations, diagrams, and working 
             papers. This is not a blog—it is a research notebook, updated as 
             understanding develops.
           </p>
         </FadeInSection>
 
-        <div className="space-y-1">
-          {writings.map((entry, index) => (
-            <FadeInSection key={entry.slug} delay={index * 50}>
-              <Link 
-                to={`/writings/${entry.slug}`}
-                className="group block py-4 border-b divider last:border-b-0"
+        <FadeInSection delay={100}>
+          {/* Search and Filter */}
+          <div className="mb-8 space-y-4">
+            {/* Search Input */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="Search writings..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-2.5 bg-muted/30 border divider rounded-none text-sm placeholder:text-muted-foreground focus:outline-none focus:border-foreground/30 transition-colors"
+              />
+            </div>
+
+            {/* Type Filters */}
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => setActiveFilter(null)}
+                className={`px-3 py-1.5 text-xs font-sans-nav tracking-wider border transition-colors ${
+                  activeFilter === null 
+                    ? 'bg-foreground text-background border-foreground' 
+                    : 'bg-transparent text-muted-foreground border-border hover:border-foreground/50'
+                }`}
               >
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1">
-                    <p className="font-sans-nav text-xs text-muted-foreground mb-1 tracking-wider">
-                      {entry.date} · {entry.type}
-                    </p>
-                    <h3 className="text-lg text-reading group-hover:text-foreground transition-colors duration-300">
-                      {entry.title}
-                    </h3>
-                    <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
-                      {entry.excerpt}
-                    </p>
-                  </div>
-                  <span className="text-muted-foreground group-hover:text-foreground transition-colors duration-300 mt-1">
-                    →
-                  </span>
-                </div>
-              </Link>
+                All
+              </button>
+              {types.map(type => (
+                <button
+                  key={type}
+                  onClick={() => setActiveFilter(activeFilter === type ? null : type)}
+                  className={`px-3 py-1.5 text-xs font-sans-nav tracking-wider border transition-colors ${
+                    activeFilter === type 
+                      ? 'bg-foreground text-background border-foreground' 
+                      : 'bg-transparent text-muted-foreground border-border hover:border-foreground/50'
+                  }`}
+                >
+                  {type}
+                </button>
+              ))}
+            </div>
+          </div>
+        </FadeInSection>
+
+        <div className="space-y-1">
+          {filteredWritings.length === 0 ? (
+            <FadeInSection>
+              <p className="text-muted-foreground text-center py-8">
+                No writings match your search.
+              </p>
             </FadeInSection>
-          ))}
+          ) : (
+            filteredWritings.map((entry, index) => (
+              <FadeInSection key={entry.slug} delay={index * 50}>
+                <Link 
+                  to={`/writings/${entry.slug}`}
+                  className="group block py-4 border-b divider last:border-b-0"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1">
+                      <p className="font-sans-nav text-xs text-muted-foreground mb-1 tracking-wider">
+                        {entry.date} · {entry.type}
+                      </p>
+                      <h3 className="text-lg text-reading group-hover:text-foreground transition-colors duration-300">
+                        {entry.title}
+                      </h3>
+                      <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
+                        {entry.excerpt}
+                      </p>
+                    </div>
+                    <span className="text-muted-foreground group-hover:text-foreground transition-colors duration-300 mt-1">
+                      →
+                    </span>
+                  </div>
+                </Link>
+              </FadeInSection>
+            ))
+          )}
         </div>
 
         <FadeInSection delay={300}>
