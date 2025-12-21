@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Atlas Codex - Writings &amp; Field Notes</title>
+    <description>An evolving archive of essays, observations, diagrams, and working papers from the Atlas Codex of Living Systems.</description>
+    <link>https://atlascodex.org</link>
+    <atom:link href="https://atlascodex.org/rss.xml" rel="self" type="application/rss+xml"/>
+    <language>en-us</language>
+    <lastBuildDate>Sat, 21 Dec 2024 00:00:00 GMT</lastBuildDate>
+    
+    <item>
+      <title>On the Difference Between Knowledge and Understanding</title>
+      <link>https://atlascodex.org/writings/knowledge-vs-understanding</link>
+      <guid>https://atlascodex.org/writings/knowledge-vs-understanding</guid>
+      <pubDate>Sun, 01 Dec 2024 00:00:00 GMT</pubDate>
+      <description>Knowledge accumulates; understanding transforms. The distinction matters for how we approach learning and action.</description>
+      <category>Essay</category>
+    </item>
+    
+    <item>
+      <title>Soil Temperature Observations, Year Three</title>
+      <link>https://atlascodex.org/writings/soil-temperature-year-three</link>
+      <guid>https://atlascodex.org/writings/soil-temperature-year-three</guid>
+      <pubDate>Fri, 01 Nov 2024 00:00:00 GMT</pubDate>
+      <description>Continuous monitoring reveals patterns invisible to casual observation. The soil remembers what the air forgets.</description>
+      <category>Field Note</category>
+    </item>
+    
+    <item>
+      <title>Feedback Loops in Small Communities</title>
+      <link>https://atlascodex.org/writings/feedback-loops-communities</link>
+      <guid>https://atlascodex.org/writings/feedback-loops-communities</guid>
+      <pubDate>Tue, 01 Oct 2024 00:00:00 GMT</pubDate>
+      <description>The same patterns that stabilize ecosystems also stabilize human groups. Recognizing them changes how we build institutions.</description>
+      <category>Working Paper</category>
+    </item>
+    
+    <item>
+      <title>Preliminary Diagrams: Water Flow Patterns</title>
+      <link>https://atlascodex.org/writings/water-flow-diagrams</link>
+      <guid>https://atlascodex.org/writings/water-flow-diagrams</guid>
+      <pubDate>Sun, 01 Sep 2024 00:00:00 GMT</pubDate>
+      <description>Water reveals landscape. Careful observation of flow patterns shows us what contour maps cannot.</description>
+      <category>Diagram Series</category>
+    </item>
+    
+    <item>
+      <title>What Failure Teaches</title>
+      <link>https://atlascodex.org/writings/what-failure-teaches</link>
+      <guid>https://atlascodex.org/writings/what-failure-teaches</guid>
+      <pubDate>Thu, 01 Aug 2024 00:00:00 GMT</pubDate>
+      <description>The curriculum of failure is more reliable than the curriculum of success. This has implications for how we learn.</description>
+      <category>Essay</category>
+    </item>
+  </channel>
+</rss>
