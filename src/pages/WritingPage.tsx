@@ -2,13 +2,18 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { getWritingBySlug, getAdjacentWritings } from '@/data/writings';
+import { calculateReadingTime, formatReadingTime } from '@/lib/readingTime';
 import FadeInSection from '@/components/FadeInSection';
+import TableOfContents from '@/components/TableOfContents';
+import ThemeToggle from '@/components/ThemeToggle';
 
 const WritingPage = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const writing = slug ? getWritingBySlug(slug) : undefined;
   const { prev, next } = slug ? getAdjacentWritings(slug) : { prev: null, next: null };
+
+  const readingTime = writing ? calculateReadingTime(writing.content) : 0;
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -43,7 +48,7 @@ const WritingPage = () => {
             <span className="font-sans-nav text-foreground tracking-widest">
               Atlas Codex
             </span>
-            <div className="w-16" />
+            <ThemeToggle />
           </div>
         </div>
       </nav>
@@ -51,9 +56,9 @@ const WritingPage = () => {
       <div className="container-reading">
         {/* Header */}
         <FadeInSection>
-          <header className="mb-16">
+          <header className="mb-12">
             <p className="font-sans-nav text-xs text-muted-foreground mb-4 tracking-wider">
-              {writing.date} · {writing.type}
+              {writing.date} · {writing.type} · {formatReadingTime(readingTime)}
             </p>
             <h1 className="text-3xl md:text-4xl lg:text-5xl font-light leading-tight mb-8 text-balance">
               {writing.title}
@@ -62,11 +67,16 @@ const WritingPage = () => {
           </header>
         </FadeInSection>
 
+        {/* Table of Contents */}
+        <FadeInSection delay={150}>
+          <TableOfContents content={writing.content} />
+        </FadeInSection>
+
         {/* Content */}
         <FadeInSection delay={200}>
           <div className="prose-codex space-y-6">
             {writing.content.map((paragraph, index) => (
-              <p key={index}>{paragraph}</p>
+              <p key={index} data-paragraph-index={index}>{paragraph}</p>
             ))}
           </div>
         </FadeInSection>

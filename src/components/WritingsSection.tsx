@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Search } from 'lucide-react';
 import FadeInSection from './FadeInSection';
 import { writings } from '@/data/writings';
+import { calculateReadingTime, formatReadingTime } from '@/lib/readingTime';
 
 const WritingsSection = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -97,31 +98,34 @@ const WritingsSection = () => {
               </p>
             </FadeInSection>
           ) : (
-            filteredWritings.map((entry, index) => (
-              <FadeInSection key={entry.slug} delay={index * 50}>
-                <Link 
-                  to={`/writings/${entry.slug}`}
-                  className="group block py-4 border-b divider last:border-b-0"
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1">
-                      <p className="font-sans-nav text-xs text-muted-foreground mb-1 tracking-wider">
-                        {entry.date} · {entry.type}
-                      </p>
-                      <h3 className="text-lg text-reading group-hover:text-foreground transition-colors duration-300">
-                        {entry.title}
-                      </h3>
-                      <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
-                        {entry.excerpt}
-                      </p>
+            filteredWritings.map((entry, index) => {
+              const readingTime = calculateReadingTime(entry.content);
+              return (
+                <FadeInSection key={entry.slug} delay={index * 50}>
+                  <Link 
+                    to={`/writings/${entry.slug}`}
+                    className="group block py-4 border-b divider last:border-b-0"
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1">
+                        <p className="font-sans-nav text-xs text-muted-foreground mb-1 tracking-wider">
+                          {entry.date} · {entry.type} · {formatReadingTime(readingTime)}
+                        </p>
+                        <h3 className="text-lg text-reading group-hover:text-foreground transition-colors duration-300">
+                          {entry.title}
+                        </h3>
+                        <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
+                          {entry.excerpt}
+                        </p>
+                      </div>
+                      <span className="text-muted-foreground group-hover:text-foreground transition-colors duration-300 mt-1">
+                        →
+                      </span>
                     </div>
-                    <span className="text-muted-foreground group-hover:text-foreground transition-colors duration-300 mt-1">
-                      →
-                    </span>
-                  </div>
-                </Link>
-              </FadeInSection>
-            ))
+                  </Link>
+                </FadeInSection>
+              );
+            })
           )}
         </div>
 
