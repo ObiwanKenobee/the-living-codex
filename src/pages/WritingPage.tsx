@@ -1,4 +1,4 @@
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { useEffect } from 'react';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { getWritingBySlug, getAdjacentWritings } from '@/data/writings';
@@ -6,14 +6,18 @@ import { calculateReadingTime, formatReadingTime } from '@/lib/readingTime';
 import FadeInSection from '@/components/FadeInSection';
 import TableOfContents from '@/components/TableOfContents';
 import ThemeToggle from '@/components/ThemeToggle';
+import ReadingProgress from '@/components/ReadingProgress';
+import { useKeyboardNavigation } from '@/hooks/useKeyboardNavigation';
 
 const WritingPage = () => {
   const { slug } = useParams<{ slug: string }>();
-  const navigate = useNavigate();
   const writing = slug ? getWritingBySlug(slug) : undefined;
   const { prev, next } = slug ? getAdjacentWritings(slug) : { prev: null, next: null };
 
   const readingTime = writing ? calculateReadingTime(writing.content) : 0;
+
+  // Enable keyboard navigation
+  useKeyboardNavigation({ prev, next });
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -53,6 +57,9 @@ const WritingPage = () => {
         </div>
       </nav>
 
+      {/* Reading Progress Bar */}
+      <ReadingProgress />
+
       <div className="container-reading">
         {/* Header */}
         <FadeInSection>
@@ -65,6 +72,13 @@ const WritingPage = () => {
             </h1>
             <div className="decorative-line !mx-0" />
           </header>
+        </FadeInSection>
+
+        {/* Keyboard navigation hint */}
+        <FadeInSection delay={100}>
+          <p className="font-sans-nav text-xs text-muted-foreground mb-8 tracking-wider">
+            Use ← → arrow keys to navigate
+          </p>
         </FadeInSection>
 
         {/* Table of Contents */}

@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { Search } from 'lucide-react';
+import { Search, Rss } from 'lucide-react';
 import FadeInSection from './FadeInSection';
 import { writings } from '@/data/writings';
 import { calculateReadingTime, formatReadingTime } from '@/lib/readingTime';
@@ -36,9 +36,21 @@ const WritingsSection = () => {
           <p className="font-sans-nav text-muted-foreground mb-4 tracking-widest">
             VI
           </p>
-          <h2 className="text-3xl md:text-4xl font-light mb-8">
-            Writings & Field Notes
-          </h2>
+          <div className="flex items-start justify-between gap-4 mb-8">
+            <h2 className="text-3xl md:text-4xl font-light">
+              Writings & Field Notes
+            </h2>
+            <a
+              href="/rss.xml"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 font-sans-nav text-muted-foreground hover:text-foreground transition-colors mt-2"
+              title="Subscribe via RSS"
+            >
+              <Rss size={14} />
+              <span className="hidden sm:inline">RSS</span>
+            </a>
+          </div>
           <p className="prose-codex mb-8">
             An evolving archive of essays, observations, diagrams, and working 
             papers. This is not a blog—it is a research notebook, updated as 
