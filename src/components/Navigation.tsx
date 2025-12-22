@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
 
@@ -8,7 +9,7 @@ const navItems = [
   { label: "Habitat One", href: "#habitat" },
   { label: "Writings", href: "#writings" },
   { label: "Ethos", href: "#ethos" },
-  { label: "Correspondence", href: "#contact" },
+  { label: "About", href: "/about", isRoute: true },
 ];
 
 const Navigation = () => {
@@ -25,13 +26,23 @@ const Navigation = () => {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8">
             {navItems.map((item) => (
-              <a
-                key={item.href}
-                href={item.href}
-                className="font-sans-nav text-muted-foreground hover:text-foreground transition-colors duration-300"
-              >
-                {item.label}
-              </a>
+              item.isRoute ? (
+                <Link
+                  key={item.href}
+                  to={item.href}
+                  className="font-sans-nav text-muted-foreground hover:text-foreground transition-colors duration-300"
+                >
+                  {item.label}
+                </Link>
+              ) : (
+                <a
+                  key={item.href}
+                  href={item.href}
+                  className="font-sans-nav text-muted-foreground hover:text-foreground transition-colors duration-300"
+                >
+                  {item.label}
+                </a>
+              )
             ))}
             <ThemeToggle />
           </div>
@@ -54,14 +65,25 @@ const Navigation = () => {
           <div className="md:hidden py-6 border-t border-border">
             <div className="flex flex-col gap-4">
               {navItems.map((item) => (
-                <a
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => setIsOpen(false)}
-                  className="font-sans-nav text-muted-foreground hover:text-foreground transition-colors duration-300"
-                >
-                  {item.label}
-                </a>
+                item.isRoute ? (
+                  <Link
+                    key={item.href}
+                    to={item.href}
+                    onClick={() => setIsOpen(false)}
+                    className="font-sans-nav text-muted-foreground hover:text-foreground transition-colors duration-300"
+                  >
+                    {item.label}
+                  </Link>
+                ) : (
+                  <a
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setIsOpen(false)}
+                    className="font-sans-nav text-muted-foreground hover:text-foreground transition-colors duration-300"
+                  >
+                    {item.label}
+                  </a>
+                )
               ))}
             </div>
           </div>
