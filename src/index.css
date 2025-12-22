@@ -215,3 +215,102 @@
     text-wrap: balance;
   }
 }
+
+/* Print-optimized styles for writing pages */
+@media print {
+  /* Hide non-essential elements */
+  nav,
+  .reading-progress,
+  .table-of-contents,
+  .theme-toggle,
+  footer nav,
+  .no-print {
+    display: none !important;
+  }
+
+  /* Reset background and colors for printing */
+  body {
+    background: white !important;
+    color: black !important;
+    font-size: 12pt;
+    line-height: 1.6;
+  }
+
+  /* Article styling */
+  article {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+  }
+
+  .container-reading {
+    max-width: 100% !important;
+    padding: 0 1in !important;
+  }
+
+  /* Typography for print */
+  h1 {
+    font-size: 24pt !important;
+    margin-bottom: 0.5in !important;
+    page-break-after: avoid;
+  }
+
+  h2, h3, h4 {
+    page-break-after: avoid;
+  }
+
+  p {
+    orphans: 3;
+    widows: 3;
+  }
+
+  .prose-codex {
+    font-size: 11pt !important;
+    color: black !important;
+  }
+
+  .prose-codex p {
+    margin-bottom: 1em !important;
+  }
+
+  /* Header metadata */
+  header p {
+    font-size: 10pt !important;
+    color: #666 !important;
+  }
+
+  /* Hide decorative elements */
+  .decorative-line {
+    display: none !important;
+  }
+
+  /* Footer for print */
+  article footer {
+    display: block !important;
+    margin-top: 2em !important;
+    padding-top: 1em !important;
+    border-top: 1px solid #ccc !important;
+    font-size: 9pt !important;
+  }
+
+  article footer a {
+    display: none !important;
+  }
+
+  /* Page breaks */
+  article {
+    page-break-before: avoid;
+  }
+
+  /* Links - show URL */
+  a[href]:after {
+    content: " (" attr(href) ")";
+    font-size: 9pt;
+    color: #666;
+  }
+
+  a[href^="#"]:after,
+  a[href^="/"]:after {
+    content: "";
+  }
+}

@@ -1,13 +1,16 @@
 import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, Rss } from 'lucide-react';
+import { Search, Rss, Bookmark } from 'lucide-react';
 import FadeInSection from './FadeInSection';
 import { writings } from '@/data/writings';
 import { calculateReadingTime, formatReadingTime } from '@/lib/readingTime';
+import { useBookmarks } from '@/hooks/useBookmarks';
 
 const WritingsSection = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
+  const [showBookmarksOnly, setShowBookmarksOnly] = useState(false);
+  const { bookmarks, toggleBookmark, isBookmarked } = useBookmarks();
 
   // Get unique types for filter buttons
   const types = useMemo(() => {
@@ -15,7 +18,7 @@ const WritingsSection = () => {
     return uniqueTypes.sort();
   }, []);
 
-  // Filter writings based on search and type filter
+  // Filter writings based on search, type filter, and bookmarks
   const filteredWritings = useMemo(() => {
     return writings.filter(entry => {
       const matchesSearch = searchQuery === '' || 
@@ -24,10 +27,11 @@ const WritingsSection = () => {
         entry.type.toLowerCase().includes(searchQuery.toLowerCase());
       
       const matchesFilter = activeFilter === null || entry.type === activeFilter;
+      const matchesBookmark = !showBookmarksOnly || bookmarks.includes(entry.slug);
       
-      return matchesSearch && matchesFilter;
+      return matchesSearch && matchesFilter && matchesBookmark;
     });
-  }, [searchQuery, activeFilter]);
+  }, [searchQuery, activeFilter, showBookmarksOnly, bookmarks]);
 
   return (
     <section id="writings" className="section-spacing border-t divider">
@@ -78,12 +82,23 @@ const WritingsSection = () => {
               <button
                 onClick={() => setActiveFilter(null)}
                 className={`px-3 py-1.5 text-xs font-sans-nav tracking-wider border transition-colors ${
-                  activeFilter === null 
+                  activeFilter === null && !showBookmarksOnly
                     ? 'bg-foreground text-background border-foreground' 
                     : 'bg-transparent text-muted-foreground border-border hover:border-foreground/50'
                 }`}
               >
                 All
+              </button>
+              <button
+                onClick={() => setShowBookmarksOnly(!showBookmarksOnly)}
+                className={`px-3 py-1.5 text-xs font-sans-nav tracking-wider border transition-colors flex items-center gap-1.5 ${
+                  showBookmarksOnly 
+                    ? 'bg-foreground text-background border-foreground' 
+                    : 'bg-transparent text-muted-foreground border-border hover:border-foreground/50'
+                }`}
+              >
+                <Bookmark size={12} />
+                Saved ({bookmarks.length})
               </button>
               {types.map(type => (
                 <button
@@ -114,27 +129,46 @@ const WritingsSection = () => {
               const readingTime = calculateReadingTime(entry.content);
               return (
                 <FadeInSection key={entry.slug} delay={index * 50}>
-                  <Link 
-                    to={`/writings/${entry.slug}`}
-                    className="group block py-4 border-b divider last:border-b-0"
-                  >
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1">
-                        <p className="font-sans-nav text-xs text-muted-foreground mb-1 tracking-wider">
-                          {entry.date} · {entry.type} · {formatReadingTime(readingTime)}
-                        </p>
-                        <h3 className="text-lg text-reading group-hover:text-foreground transition-colors duration-300">
-                          {entry.title}
-                        </h3>
-                        <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
-                          {entry.excerpt}
-                        </p>
+                  <div className="flex items-start gap-4 py-4 border-b divider last:border-b-0">
+                    <Link 
+                      to={`/writings/${entry.slug}`}
+                      className="group flex-1"
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1">
+                          <p className="font-sans-nav text-xs text-muted-foreground mb-1 tracking-wider">
+                            {entry.date} · {entry.type} · {formatReadingTime(readingTime)}
+                          </p>
+                          <h3 className="text-lg text-reading group-hover:text-foreground transition-colors duration-300">
+                            {entry.title}
+                          </h3>
+                          <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
+                            {entry.excerpt}
+                          </p>
+                        </div>
+                        <span className="text-muted-foreground group-hover:text-foreground transition-colors duration-300 mt-1">
+                          →
+                        </span>
                       </div>
-                      <span className="text-muted-foreground group-hover:text-foreground transition-colors duration-300 mt-1">
-                        →
-                      </span>
-                    </div>
-                  </Link>
+                    </Link>
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        toggleBookmark(entry.slug);
+                      }}
+                      className={`mt-1 p-1.5 transition-colors ${
+                        isBookmarked(entry.slug)
+                          ? 'text-accent'
+                          : 'text-muted-foreground hover:text-foreground'
+                      }`}
+                      title={isBookmarked(entry.slug) ? 'Remove bookmark' : 'Save for later'}
+                    >
+                      <Bookmark 
+                        size={16} 
+                        fill={isBookmarked(entry.slug) ? 'currentColor' : 'none'}
+                      />
+                    </button>
+                  </div>
                 </FadeInSection>
               );
             })

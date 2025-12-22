@@ -1,6 +1,6 @@
 import { useParams, Link } from 'react-router-dom';
 import { useEffect } from 'react';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Bookmark, Printer } from 'lucide-react';
 import { getWritingBySlug, getAdjacentWritings } from '@/data/writings';
 import { calculateReadingTime, formatReadingTime } from '@/lib/readingTime';
 import FadeInSection from '@/components/FadeInSection';
@@ -8,6 +8,7 @@ import TableOfContents from '@/components/TableOfContents';
 import ThemeToggle from '@/components/ThemeToggle';
 import ReadingProgress from '@/components/ReadingProgress';
 import { useKeyboardNavigation } from '@/hooks/useKeyboardNavigation';
+import { useBookmarks } from '@/hooks/useBookmarks';
 
 const WritingPage = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -15,6 +16,8 @@ const WritingPage = () => {
   const { prev, next } = slug ? getAdjacentWritings(slug) : { prev: null, next: null };
 
   const readingTime = writing ? calculateReadingTime(writing.content) : 0;
+  const { toggleBookmark, isBookmarked } = useBookmarks();
+  const bookmarked = slug ? isBookmarked(slug) : false;
 
   // Enable keyboard navigation
   useKeyboardNavigation({ prev, next });
@@ -52,7 +55,27 @@ const WritingPage = () => {
             <span className="font-sans-nav text-foreground tracking-widest">
               Atlas Codex
             </span>
-            <ThemeToggle />
+            <div className="flex items-center gap-2 no-print">
+              <button
+                onClick={() => slug && toggleBookmark(slug)}
+                className={`p-1.5 transition-colors ${
+                  bookmarked
+                    ? 'text-accent'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+                title={bookmarked ? 'Remove bookmark' : 'Save for later'}
+              >
+                <Bookmark size={16} fill={bookmarked ? 'currentColor' : 'none'} />
+              </button>
+              <button
+                onClick={() => window.print()}
+                className="p-1.5 text-muted-foreground hover:text-foreground transition-colors"
+                title="Print this page"
+              >
+                <Printer size={16} />
+              </button>
+              <ThemeToggle />
+            </div>
           </div>
         </div>
       </nav>
