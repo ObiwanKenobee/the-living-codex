@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Send, Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 const NewsletterSignup = () => {
   const [email, setEmail] = useState('');
@@ -22,17 +23,30 @@ const NewsletterSignup = () => {
 
     setIsSubmitting(true);
 
-    // Simulate subscription (replace with actual API call when backend is connected)
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    try {
+      const { data, error } = await supabase.functions.invoke('newsletter-subscribe', {
+        body: { email: email.trim() },
+      });
 
-    setIsSubmitting(false);
-    setIsSubscribed(true);
-    setEmail('');
+      if (error) throw error;
 
-    toast({
-      title: 'Subscribed',
-      description: 'You will receive updates as understanding develops.',
-    });
+      setIsSubscribed(true);
+      setEmail('');
+
+      toast({
+        title: 'Subscribed',
+        description: 'You will receive updates as understanding develops.',
+      });
+    } catch (error: any) {
+      console.error('Newsletter subscription error:', error);
+      toast({
+        title: 'Subscription failed',
+        description: error.message || 'Please try again later.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (isSubscribed) {
