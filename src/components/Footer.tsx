@@ -32,6 +32,12 @@ const Footer = () => {
             About
           </Link>
           <Link 
+            to="/events"
+            className="font-sans-nav text-xs text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Events
+          </Link>
+          <Link 
             to="/resources"
             className="font-sans-nav text-xs text-muted-foreground hover:text-foreground transition-colors"
           >
