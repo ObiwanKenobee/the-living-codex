@@ -8,6 +8,7 @@ const navItems = [
   { label: "Four Pillars", href: "#pillars" },
   { label: "Habitat One", href: "#habitat" },
   { label: "Writings", href: "#writings" },
+  { label: "Events", href: "/events", isRoute: true },
   { label: "Resources", href: "/resources", isRoute: true },
   { label: "About", href: "/about", isRoute: true },
 ];

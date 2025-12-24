@@ -1,33 +1,27 @@
 import { Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft, Download, ExternalLink, BookOpen, FileText, Library } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import FadeInSection from '@/components/FadeInSection';
+import { supabase } from '@/integrations/supabase/client';
 
-const resources = {
-  codex: [
-    {
-      title: 'The Atlas Codex: Complete Framework',
-      description: 'The full philosophical-scientific framework explaining how living systems organize, sustain, collapse, and regenerate.',
-      format: 'PDF',
-      size: '2.4 MB',
-      downloadUrl: '#',
-    },
-    {
-      title: 'Four Pillars Summary',
-      description: 'A condensed overview of the Material, Mathematical, Moral, and Human foundations.',
-      format: 'PDF',
-      size: '890 KB',
-      downloadUrl: '#',
-    },
-    {
-      title: 'Practitioner\'s Guide',
-      description: 'Practical applications of the Codex principles for organizations and communities.',
-      format: 'PDF',
-      size: '1.6 MB',
-      downloadUrl: '#',
-    },
-  ],
+interface StorageFile {
+  name: string;
+  id: string;
+  metadata: {
+    size: number;
+    mimetype: string;
+  };
+}
+
+const formatFileSize = (bytes: number): string => {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+};
+
+const staticResources = {
   research: [
     {
       title: 'Soil Carbon Dynamics in Regenerative Systems',
@@ -106,7 +100,77 @@ const resources = {
   ],
 };
 
+// Fallback documents if storage is empty
+const fallbackDocuments = [
+  {
+    title: 'The Atlas Codex: Complete Framework',
+    description: 'The full philosophical-scientific framework explaining how living systems organize, sustain, collapse, and regenerate.',
+    format: 'PDF',
+    size: '2.4 MB',
+    downloadUrl: '#',
+  },
+  {
+    title: 'Four Pillars Summary',
+    description: 'A condensed overview of the Material, Mathematical, Moral, and Human foundations.',
+    format: 'PDF',
+    size: '890 KB',
+    downloadUrl: '#',
+  },
+  {
+    title: 'Practitioner\'s Guide',
+    description: 'Practical applications of the Codex principles for organizations and communities.',
+    format: 'PDF',
+    size: '1.6 MB',
+    downloadUrl: '#',
+  },
+];
+
 const ResourcesPage = () => {
+  // Fetch files from storage bucket
+  const { data: storageFiles } = useQuery({
+    queryKey: ['resource-files'],
+    queryFn: async () => {
+      const { data, error } = await supabase.storage
+        .from('resources')
+        .list('', {
+          limit: 100,
+          offset: 0,
+          sortBy: { column: 'name', order: 'asc' },
+        });
+      
+      if (error) {
+        console.error('Error fetching resources:', error);
+        return [];
+      }
+      return data || [];
+    },
+  });
+
+  const getDownloadUrl = (fileName: string) => {
+    const { data } = supabase.storage.from('resources').getPublicUrl(fileName);
+    return data.publicUrl;
+  };
+
+  const formatFileName = (name: string): string => {
+    // Remove extension and format nicely
+    return name
+      .replace(/\.[^/.]+$/, '')
+      .replace(/[-_]/g, ' ')
+      .replace(/\b\w/g, c => c.toUpperCase());
+  };
+
+  const documents = storageFiles && storageFiles.length > 0
+    ? storageFiles
+        .filter(f => f.name.endsWith('.pdf'))
+        .map(f => ({
+          title: formatFileName(f.name),
+          description: `Download ${f.name}`,
+          format: 'PDF',
+          size: formatFileSize((f.metadata as any)?.size || 0),
+          downloadUrl: getDownloadUrl(f.name),
+        }))
+    : fallbackDocuments;
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Navigation />
@@ -138,7 +202,7 @@ const ResourcesPage = () => {
                 <h2 className="text-2xl font-light">Codex Documents</h2>
               </div>
               <div className="space-y-4">
-                {resources.codex.map((doc, index) => (
+                {documents.map((doc, index) => (
                   <div 
                     key={index}
                     className="p-6 border divider bg-card hover:bg-muted/20 transition-colors group"
@@ -153,6 +217,9 @@ const ResourcesPage = () => {
                       </div>
                       <a 
                         href={doc.downloadUrl}
+                        download
+                        target="_blank"
+                        rel="noopener noreferrer"
                         className="inline-flex items-center gap-2 px-4 py-2 border divider hover:bg-foreground hover:text-background transition-colors font-sans-nav text-xs tracking-wider"
                       >
                         <Download size={14} />
@@ -162,6 +229,11 @@ const ResourcesPage = () => {
                   </div>
                 ))}
               </div>
+              {storageFiles && storageFiles.length === 0 && (
+                <p className="text-sm text-muted-foreground mt-4 italic">
+                  Documents are currently being prepared. Check back soon for downloadable resources.
+                </p>
+              )}
             </section>
           </FadeInSection>
 
@@ -173,7 +245,7 @@ const ResourcesPage = () => {
                 <h2 className="text-2xl font-light">Research Papers</h2>
               </div>
               <div className="space-y-4">
-                {resources.research.map((paper, index) => (
+                {staticResources.research.map((paper, index) => (
                   <div 
                     key={index}
                     className="p-6 border divider bg-card hover:bg-muted/20 transition-colors"
@@ -211,7 +283,7 @@ const ResourcesPage = () => {
                 <h2 className="text-2xl font-light">Curated Reading Lists</h2>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {resources.readingLists.map((list, index) => (
+                {staticResources.readingLists.map((list, index) => (
                   <div 
                     key={index}
                     className="p-6 border divider bg-card"
