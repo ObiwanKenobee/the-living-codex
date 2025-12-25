@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
-import { LogOut, Users, Mail, Calendar, RefreshCw } from 'lucide-react';
+import { LogOut, Users, Mail, Calendar, CalendarPlus, RefreshCw } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
@@ -15,6 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import EventsManager from '@/components/admin/EventsManager';
 import type { User, Session } from '@supabase/supabase-js';
 
 const AdminDashboard = () => {
@@ -154,7 +155,7 @@ const AdminDashboard = () => {
       {/* Main Content */}
       <main className="container-wide py-8">
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
           <div className="p-6 border divider bg-card">
             <div className="flex items-center gap-3 mb-2">
               <Users size={18} className="text-muted-foreground" />
@@ -171,6 +172,13 @@ const AdminDashboard = () => {
           </div>
           <div className="p-6 border divider bg-card">
             <div className="flex items-center gap-3 mb-2">
+              <CalendarPlus size={18} className="text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">Total Events</span>
+            </div>
+            <p className="text-3xl font-light">—</p>
+          </div>
+          <div className="p-6 border divider bg-card">
+            <div className="flex items-center gap-3 mb-2">
               <Calendar size={18} className="text-muted-foreground" />
               <span className="text-sm text-muted-foreground">Event Registrations</span>
             </div>
@@ -179,12 +187,18 @@ const AdminDashboard = () => {
         </div>
 
         {/* Tabs */}
-        <Tabs defaultValue="subscribers" className="w-full">
+        <Tabs defaultValue="events" className="w-full">
           <TabsList className="mb-6">
-            <TabsTrigger value="subscribers">Newsletter Subscribers</TabsTrigger>
-            <TabsTrigger value="messages">Contact Messages</TabsTrigger>
-            <TabsTrigger value="registrations">Event Registrations</TabsTrigger>
+            <TabsTrigger value="events">Events</TabsTrigger>
+            <TabsTrigger value="registrations">Registrations</TabsTrigger>
+            <TabsTrigger value="subscribers">Subscribers</TabsTrigger>
+            <TabsTrigger value="messages">Messages</TabsTrigger>
           </TabsList>
+
+          {/* Events Tab */}
+          <TabsContent value="events">
+            <EventsManager />
+          </TabsContent>
 
           {/* Subscribers Tab */}
           <TabsContent value="subscribers">
