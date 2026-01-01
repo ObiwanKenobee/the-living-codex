@@ -30,6 +30,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import ImageUpload from './ImageUpload';
 import type { Tables } from '@/integrations/supabase/types';
 
 const eventSchema = z.object({
@@ -44,6 +45,7 @@ const eventSchema = z.object({
   max_attendees: z.number().min(1).optional().nullable(),
   registration_deadline: z.string().optional(),
   is_published: z.boolean(),
+  image_url: z.string().url().optional().nullable().or(z.literal('')),
 });
 
 type EventFormData = z.infer<typeof eventSchema>;
@@ -73,6 +75,7 @@ const EventForm = ({ event, open, onClose, onSuccess }: EventFormProps) => {
       max_attendees: null,
       registration_deadline: '',
       is_published: true,
+      image_url: null,
     },
   });
 
@@ -92,6 +95,7 @@ const EventForm = ({ event, open, onClose, onSuccess }: EventFormProps) => {
           ? format(new Date(event.registration_deadline), "yyyy-MM-dd'T'HH:mm") 
           : '',
         is_published: event.is_published ?? true,
+        image_url: event.image_url || null,
       });
     } else {
       form.reset({
@@ -106,6 +110,7 @@ const EventForm = ({ event, open, onClose, onSuccess }: EventFormProps) => {
         max_attendees: null,
         registration_deadline: '',
         is_published: true,
+        image_url: null,
       });
     }
   }, [event, form]);
@@ -127,6 +132,7 @@ const EventForm = ({ event, open, onClose, onSuccess }: EventFormProps) => {
         ? new Date(data.registration_deadline).toISOString() 
         : null,
       is_published: data.is_published,
+      image_url: data.image_url || null,
     };
 
     try {
@@ -187,6 +193,23 @@ const EventForm = ({ event, open, onClose, onSuccess }: EventFormProps) => {
                   <FormLabel>Title</FormLabel>
                   <FormControl>
                     <Input placeholder="Event title" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="image_url"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Event Image</FormLabel>
+                  <FormControl>
+                    <ImageUpload
+                      value={field.value}
+                      onChange={field.onChange}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

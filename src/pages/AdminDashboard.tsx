@@ -16,6 +16,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import EventsManager from '@/components/admin/EventsManager';
+import CSVExport from '@/components/admin/CSVExport';
 import type { User, Session } from '@supabase/supabase-js';
 
 const AdminDashboard = () => {
@@ -205,10 +206,22 @@ const AdminDashboard = () => {
             <div className="border divider bg-card overflow-hidden">
               <div className="p-4 border-b divider flex items-center justify-between">
                 <h2 className="font-light">Newsletter Subscribers</h2>
-                <Button variant="ghost" size="sm" onClick={() => refetchSubscribers()}>
-                  <RefreshCw size={14} className="mr-2" />
-                  Refresh
-                </Button>
+                <div className="flex items-center gap-2">
+                  <CSVExport
+                    data={subscribers || []}
+                    filename="newsletter-subscribers"
+                    columns={[
+                      { key: 'email', label: 'Email' },
+                      { key: 'confirmed', label: 'Confirmed' },
+                      { key: 'subscribed_at', label: 'Subscribed At' },
+                      { key: 'unsubscribed_at', label: 'Unsubscribed At' },
+                    ]}
+                  />
+                  <Button variant="ghost" size="sm" onClick={() => refetchSubscribers()}>
+                    <RefreshCw size={14} className="mr-2" />
+                    Refresh
+                  </Button>
+                </div>
               </div>
               <div className="overflow-x-auto">
                 <Table>
@@ -299,10 +312,25 @@ const AdminDashboard = () => {
             <div className="border divider bg-card overflow-hidden">
               <div className="p-4 border-b divider flex items-center justify-between">
                 <h2 className="font-light">Event Registrations</h2>
-                <Button variant="ghost" size="sm" onClick={() => refetchRegistrations()}>
-                  <RefreshCw size={14} className="mr-2" />
-                  Refresh
-                </Button>
+                <div className="flex items-center gap-2">
+                  <CSVExport
+                    data={registrations || []}
+                    filename="event-registrations"
+                    columns={[
+                      { key: 'name', label: 'Name' },
+                      { key: 'email', label: 'Email' },
+                      { key: 'phone', label: 'Phone' },
+                      { key: 'events.title', label: 'Event' },
+                      { key: 'status', label: 'Status' },
+                      { key: 'notes', label: 'Notes' },
+                      { key: 'registered_at', label: 'Registered At' },
+                    ]}
+                  />
+                  <Button variant="ghost" size="sm" onClick={() => refetchRegistrations()}>
+                    <RefreshCw size={14} className="mr-2" />
+                    Refresh
+                  </Button>
+                </div>
               </div>
               <div className="overflow-x-auto">
                 <Table>
