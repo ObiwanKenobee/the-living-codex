@@ -101,65 +101,76 @@ const EventsPage = () => {
                   {upcomingEvents.map((event) => (
                     <div 
                       key={event.id}
-                      className="p-6 border divider bg-card hover:bg-muted/20 transition-colors"
+                      className="border divider bg-card hover:bg-muted/20 transition-colors overflow-hidden"
                     >
-                      <div className="flex items-start gap-3 mb-3">
-                        <span className="px-2 py-1 text-xs font-sans-nav bg-primary/10 text-primary">
-                          {eventTypeLabels[event.event_type] || event.event_type}
-                        </span>
-                        {event.is_virtual && (
-                          <span className="px-2 py-1 text-xs font-sans-nav bg-accent/10 text-accent flex items-center gap-1">
-                            <Video size={12} />
-                            Virtual
-                          </span>
-                        )}
-                      </div>
-                      
-                      <h3 className="text-xl font-light mb-3">{event.title}</h3>
-                      
-                      <div className="space-y-2 text-sm text-muted-foreground mb-4">
-                        <div className="flex items-center gap-2">
-                          <Calendar size={14} />
-                          <span>{format(new Date(event.start_date), 'EEEE, MMMM d, yyyy')}</span>
+                      {event.image_url && (
+                        <div className="aspect-[16/9] overflow-hidden">
+                          <img
+                            src={event.image_url}
+                            alt={event.title}
+                            className="w-full h-full object-cover"
+                          />
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Clock size={14} />
-                          <span>
-                            {format(new Date(event.start_date), 'h:mm a')}
-                            {event.end_date && ` - ${format(new Date(event.end_date), 'h:mm a')}`}
-                          </span>
-                        </div>
-                        {event.location && (
-                          <div className="flex items-center gap-2">
-                            <MapPin size={14} />
-                            <span>{event.location}</span>
-                          </div>
-                        )}
-                        {event.max_attendees && (
-                          <div className="flex items-center gap-2">
-                            <Users size={14} />
-                            <span>Limited to {event.max_attendees} attendees</span>
-                          </div>
-                        )}
-                      </div>
-                      
-                      {event.description && (
-                        <p className="text-sm text-reading mb-4 line-clamp-3">{event.description}</p>
                       )}
-                      
-                      <div className="flex items-center justify-between mt-4 pt-4 border-t divider">
-                        {event.registration_deadline && (
-                          <span className="text-xs text-muted-foreground">
-                            Register by {format(new Date(event.registration_deadline), 'MMM d')}
+                      <div className="p-6">
+                        <div className="flex items-start gap-3 mb-3">
+                          <span className="px-2 py-1 text-xs font-sans-nav bg-primary/10 text-primary">
+                            {eventTypeLabels[event.event_type] || event.event_type}
                           </span>
+                          {event.is_virtual && (
+                            <span className="px-2 py-1 text-xs font-sans-nav bg-accent/10 text-accent flex items-center gap-1">
+                              <Video size={12} />
+                              Virtual
+                            </span>
+                          )}
+                        </div>
+                        
+                        <h3 className="text-xl font-light mb-3">{event.title}</h3>
+                        
+                        <div className="space-y-2 text-sm text-muted-foreground mb-4">
+                          <div className="flex items-center gap-2">
+                            <Calendar size={14} />
+                            <span>{format(new Date(event.start_date), 'EEEE, MMMM d, yyyy')}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Clock size={14} />
+                            <span>
+                              {format(new Date(event.start_date), 'h:mm a')}
+                              {event.end_date && ` - ${format(new Date(event.end_date), 'h:mm a')}`}
+                            </span>
+                          </div>
+                          {event.location && (
+                            <div className="flex items-center gap-2">
+                              <MapPin size={14} />
+                              <span>{event.location}</span>
+                            </div>
+                          )}
+                          {event.max_attendees && (
+                            <div className="flex items-center gap-2">
+                              <Users size={14} />
+                              <span>Limited to {event.max_attendees} attendees</span>
+                            </div>
+                          )}
+                        </div>
+                        
+                        {event.description && (
+                          <p className="text-sm text-reading mb-4 line-clamp-3">{event.description}</p>
                         )}
-                        <button
-                          onClick={() => setSelectedEvent(event)}
-                          disabled={!isRegistrationOpen(event)}
-                          className="ml-auto px-4 py-2 border divider hover:bg-foreground hover:text-background transition-colors font-sans-nav text-xs tracking-wider disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          {isRegistrationOpen(event) ? 'Register' : 'Registration Closed'}
-                        </button>
+                        
+                        <div className="flex items-center justify-between mt-4 pt-4 border-t divider">
+                          {event.registration_deadline && (
+                            <span className="text-xs text-muted-foreground">
+                              Register by {format(new Date(event.registration_deadline), 'MMM d')}
+                            </span>
+                          )}
+                          <button
+                            onClick={() => setSelectedEvent(event)}
+                            disabled={!isRegistrationOpen(event)}
+                            className="ml-auto px-4 py-2 border divider hover:bg-foreground hover:text-background transition-colors font-sans-nav text-xs tracking-wider disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            {isRegistrationOpen(event) ? 'Register' : 'Registration Closed'}
+                          </button>
+                        </div>
                       </div>
                     </div>
                   ))}
