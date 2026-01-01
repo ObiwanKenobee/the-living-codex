@@ -56,6 +56,10 @@ const EventsPage = () => {
 
   const upcomingEvents = events?.filter(e => !isPast(new Date(e.start_date))) || [];
   const pastEvents = events?.filter(e => isPast(new Date(e.start_date))) || [];
+  
+  // Featured event is the next upcoming event (first in the list)
+  const featuredEvent = upcomingEvents.length > 0 ? upcomingEvents[0] : null;
+  const remainingUpcomingEvents = upcomingEvents.slice(1);
 
   const isRegistrationOpen = (event: Event) => {
     if (!event.registration_deadline) return true;
@@ -85,20 +89,111 @@ const EventsPage = () => {
             </p>
           </FadeInSection>
 
+          {/* Featured Event Hero */}
+          {featuredEvent && (
+            <FadeInSection delay={50}>
+              <section className="mt-12">
+                <div className="relative overflow-hidden border divider bg-card">
+                  {featuredEvent.image_url && (
+                    <div className="absolute inset-0">
+                      <img
+                        src={featuredEvent.image_url}
+                        alt={featuredEvent.title}
+                        className="w-full h-full object-cover opacity-20"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-r from-background via-background/90 to-background/70" />
+                    </div>
+                  )}
+                  <div className="relative grid md:grid-cols-2 gap-8 p-8 md:p-12">
+                    <div className="flex flex-col justify-center">
+                      <span className="text-xs font-sans-nav text-primary tracking-wider mb-4">FEATURED EVENT</span>
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="px-2 py-1 text-xs font-sans-nav bg-primary/10 text-primary">
+                          {eventTypeLabels[featuredEvent.event_type] || featuredEvent.event_type}
+                        </span>
+                        {featuredEvent.is_virtual && (
+                          <span className="px-2 py-1 text-xs font-sans-nav bg-accent/10 text-accent flex items-center gap-1">
+                            <Video size={12} />
+                            Virtual
+                          </span>
+                        )}
+                      </div>
+                      <h2 className="text-3xl md:text-4xl font-light mb-4">{featuredEvent.title}</h2>
+                      {featuredEvent.description && (
+                        <p className="text-reading text-muted-foreground mb-6 line-clamp-3">
+                          {featuredEvent.description}
+                        </p>
+                      )}
+                      <div className="space-y-2 text-sm text-muted-foreground mb-6">
+                        <div className="flex items-center gap-2">
+                          <Calendar size={16} />
+                          <span>{format(new Date(featuredEvent.start_date), 'EEEE, MMMM d, yyyy')}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Clock size={16} />
+                          <span>
+                            {format(new Date(featuredEvent.start_date), 'h:mm a')}
+                            {featuredEvent.end_date && ` - ${format(new Date(featuredEvent.end_date), 'h:mm a')}`}
+                          </span>
+                        </div>
+                        {featuredEvent.location && (
+                          <div className="flex items-center gap-2">
+                            <MapPin size={16} />
+                            <span>{featuredEvent.location}</span>
+                          </div>
+                        )}
+                        {featuredEvent.max_attendees && (
+                          <div className="flex items-center gap-2">
+                            <Users size={16} />
+                            <span>Limited to {featuredEvent.max_attendees} attendees</span>
+                          </div>
+                        )}
+                      </div>
+                      <button
+                        onClick={() => setSelectedEvent(featuredEvent)}
+                        disabled={!isRegistrationOpen(featuredEvent)}
+                        className="self-start px-6 py-3 bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-sans-nav text-sm tracking-wider disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {isRegistrationOpen(featuredEvent) ? 'Register Now' : 'Registration Closed'}
+                      </button>
+                    </div>
+                    {featuredEvent.image_url && (
+                      <div className="hidden md:block">
+                        <div className="aspect-[4/3] overflow-hidden border divider">
+                          <img
+                            src={featuredEvent.image_url}
+                            alt={featuredEvent.title}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </section>
+            </FadeInSection>
+          )}
+
           {/* Upcoming Events */}
           <FadeInSection delay={100}>
             <section className="mt-16">
-              <h2 className="text-2xl font-light mb-8">Upcoming Events</h2>
+              <h2 className="text-2xl font-light mb-8">
+                {featuredEvent ? 'More Upcoming Events' : 'Upcoming Events'}
+              </h2>
               
               {isLoading ? (
                 <div className="text-muted-foreground">Loading events...</div>
-              ) : upcomingEvents.length === 0 ? (
+              ) : remainingUpcomingEvents.length === 0 && !featuredEvent ? (
                 <div className="p-8 border divider bg-card text-center">
                   <p className="text-muted-foreground">No upcoming events scheduled. Check back soon!</p>
                 </div>
+              ) : remainingUpcomingEvents.length === 0 ? (
+                <div className="p-8 border divider bg-card text-center">
+                  <p className="text-muted-foreground">No additional events scheduled at this time.</p>
+                </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {upcomingEvents.map((event) => (
+                  {remainingUpcomingEvents.map((event) => (
                     <div 
                       key={event.id}
                       className="border divider bg-card hover:bg-muted/20 transition-colors overflow-hidden"
