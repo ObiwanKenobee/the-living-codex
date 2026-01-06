@@ -1,22 +1,36 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { ArrowLeft, Calendar, MapPin, LogOut, User } from 'lucide-react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { ArrowLeft, Calendar, MapPin, LogOut, User, Heart, Clock } from 'lucide-react';
 import { format, isPast } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useEventFavorites } from '@/hooks/useEventFavorites';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import FadeInSection from '@/components/FadeInSection';
+import ProfileEditor from '@/components/ProfileEditor';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 
+interface Event {
+  id: string;
+  title: string;
+  start_date: string;
+  end_date: string | null;
+  location: string | null;
+  is_virtual: boolean;
+  event_type: string;
+}
+
 const DashboardPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const { favorites, removeFavorite } = useEventFavorites();
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -42,7 +56,7 @@ const DashboardPage = () => {
     return () => subscription.unsubscribe();
   }, [navigate]);
 
-  const { data: profile } = useQuery({
+  const { data: profile, refetch: refetchProfile } = useQuery({
     queryKey: ['profile', user?.id],
     queryFn: async () => {
       if (!user) return null;
@@ -85,6 +99,22 @@ const DashboardPage = () => {
     enabled: !!user,
   });
 
+  const { data: favoriteEvents } = useQuery({
+    queryKey: ['favorite-events', favorites],
+    queryFn: async () => {
+      if (favorites.length === 0) return [];
+      const { data, error } = await supabase
+        .from('events')
+        .select('*')
+        .in('id', favorites)
+        .order('start_date', { ascending: true });
+      
+      if (error) throw error;
+      return data as Event[];
+    },
+    enabled: favorites.length > 0,
+  });
+
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     toast({
@@ -100,6 +130,10 @@ const DashboardPage = () => {
 
   const pastRegistrations = registrations?.filter(
     r => r.events && isPast(new Date(r.events.start_date))
+  ) || [];
+
+  const upcomingFavorites = favoriteEvents?.filter(
+    e => !isPast(new Date(e.start_date))
   ) || [];
 
   if (isLoading) {
@@ -147,6 +181,14 @@ const DashboardPage = () => {
             <Tabs defaultValue="events" className="w-full">
               <TabsList className="mb-8">
                 <TabsTrigger value="events">My Events</TabsTrigger>
+                <TabsTrigger value="favorites">
+                  Saved Events
+                  {upcomingFavorites.length > 0 && (
+                    <span className="ml-2 px-1.5 py-0.5 text-xs bg-primary/10 text-primary rounded">
+                      {upcomingFavorites.length}
+                    </span>
+                  )}
+                </TabsTrigger>
                 <TabsTrigger value="profile">Profile</TabsTrigger>
               </TabsList>
 
@@ -228,6 +270,69 @@ const DashboardPage = () => {
                 </div>
               </TabsContent>
 
+              <TabsContent value="favorites">
+                <div className="space-y-6">
+                  <h2 className="text-xl font-light">Saved Events</h2>
+                  {upcomingFavorites.length === 0 ? (
+                    <div className="p-8 border divider bg-card text-center">
+                      <Heart className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                      <p className="text-muted-foreground mb-4">
+                        You haven't saved any events yet. Browse events and click the heart icon to save them here.
+                      </p>
+                      <Link to="/events">
+                        <Button variant="outline">Browse Events</Button>
+                      </Link>
+                    </div>
+                  ) : (
+                    <div className="grid gap-4">
+                      {upcomingFavorites.map((event) => (
+                        <div 
+                          key={event.id}
+                          className="p-6 border divider bg-card"
+                        >
+                          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <div>
+                              <h3 className="text-lg font-light mb-2">{event.title}</h3>
+                              <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+                                <span className="flex items-center gap-1">
+                                  <Calendar size={14} />
+                                  {format(new Date(event.start_date), 'MMM d, yyyy')}
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <Clock size={14} />
+                                  {format(new Date(event.start_date), 'h:mm a')}
+                                </span>
+                                {event.location && (
+                                  <span className="flex items-center gap-1">
+                                    <MapPin size={14} />
+                                    {event.location}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex gap-2 self-start">
+                              <Link to="/events">
+                                <Button variant="outline" size="sm">
+                                  View Event
+                                </Button>
+                              </Link>
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                onClick={() => removeFavorite(event.id)}
+                                className="text-destructive hover:text-destructive"
+                              >
+                                <Heart size={16} className="fill-current" />
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </TabsContent>
+
               <TabsContent value="profile">
                 <div className="max-w-lg">
                   <div className="p-8 border divider bg-card">
@@ -252,11 +357,22 @@ const DashboardPage = () => {
                         <span className="text-muted-foreground">Events attended</span>
                         <span>{pastRegistrations.length}</span>
                       </div>
-                      <div className="flex justify-between py-2">
+                      <div className="flex justify-between py-2 border-b divider">
                         <span className="text-muted-foreground">Upcoming events</span>
                         <span>{upcomingRegistrations.length}</span>
                       </div>
+                      <div className="flex justify-between py-2">
+                        <span className="text-muted-foreground">Saved events</span>
+                        <span>{upcomingFavorites.length}</span>
+                      </div>
                     </div>
+
+                    {profile && (
+                      <ProfileEditor 
+                        profile={profile} 
+                        onUpdate={() => refetchProfile()} 
+                      />
+                    )}
                   </div>
                 </div>
               </TabsContent>
