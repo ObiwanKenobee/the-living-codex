@@ -12,6 +12,8 @@ import EventsPage from "./pages/EventsPage";
 import AuthPage from "./pages/AuthPage";
 import UserAuthPage from "./pages/UserAuthPage";
 import DashboardPage from "./pages/DashboardPage";
+import EmailConfirmationPage from "./pages/EmailConfirmationPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 
@@ -31,6 +33,8 @@ const App = () => (
             <Route path="/events" element={<EventsPage />} />
             <Route path="/login" element={<UserAuthPage />} />
             <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/auth/confirm" element={<EmailConfirmationPage />} />
+            <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/writings/:slug" element={<WritingPage />} />

@@ -1,13 +1,16 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowLeft, Calendar, MapPin, Users, Video, Clock } from 'lucide-react';
+import { ArrowLeft, Calendar, MapPin, Users, Video, Clock, Heart } from 'lucide-react';
 import { format, isPast } from 'date-fns';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import FadeInSection from '@/components/FadeInSection';
 import EventRegistrationForm from '@/components/EventRegistrationForm';
 import { supabase } from '@/integrations/supabase/client';
+import { useEventFavorites } from '@/hooks/useEventFavorites';
+import { useToast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -40,6 +43,8 @@ const eventTypeLabels: Record<string, string> = {
 
 const EventsPage = () => {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const { toggleFavorite, isFavorite } = useEventFavorites();
+  const { toast } = useToast();
 
   const { data: events, isLoading } = useQuery({
     queryKey: ['events'],
@@ -149,13 +154,34 @@ const EventsPage = () => {
                           </div>
                         )}
                       </div>
-                      <button
-                        onClick={() => setSelectedEvent(featuredEvent)}
-                        disabled={!isRegistrationOpen(featuredEvent)}
-                        className="self-start px-6 py-3 bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-sans-nav text-sm tracking-wider disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {isRegistrationOpen(featuredEvent) ? 'Register Now' : 'Registration Closed'}
-                      </button>
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={() => setSelectedEvent(featuredEvent)}
+                          disabled={!isRegistrationOpen(featuredEvent)}
+                          className="px-6 py-3 bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-sans-nav text-sm tracking-wider disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {isRegistrationOpen(featuredEvent) ? 'Register Now' : 'Registration Closed'}
+                        </button>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => {
+                            toggleFavorite(featuredEvent.id);
+                            toast({
+                              title: isFavorite(featuredEvent.id) ? 'Removed from saved' : 'Saved to favorites',
+                              description: isFavorite(featuredEvent.id) 
+                                ? 'Event removed from your saved list.' 
+                                : 'View saved events in your dashboard.',
+                            });
+                          }}
+                          className="h-12 w-12"
+                        >
+                          <Heart 
+                            size={20} 
+                            className={isFavorite(featuredEvent.id) ? 'fill-primary text-primary' : ''} 
+                          />
+                        </Button>
+                      </div>
                     </div>
                     {featuredEvent.image_url && (
                       <div className="hidden md:block">
@@ -253,18 +279,41 @@ const EventsPage = () => {
                         )}
                         
                         <div className="flex items-center justify-between mt-4 pt-4 border-t divider">
-                          {event.registration_deadline && (
-                            <span className="text-xs text-muted-foreground">
-                              Register by {format(new Date(event.registration_deadline), 'MMM d')}
-                            </span>
-                          )}
-                          <button
-                            onClick={() => setSelectedEvent(event)}
-                            disabled={!isRegistrationOpen(event)}
-                            className="ml-auto px-4 py-2 border divider hover:bg-foreground hover:text-background transition-colors font-sans-nav text-xs tracking-wider disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
-                            {isRegistrationOpen(event) ? 'Register' : 'Registration Closed'}
-                          </button>
+                          <div className="flex items-center gap-2">
+                            {event.registration_deadline && (
+                              <span className="text-xs text-muted-foreground">
+                                Register by {format(new Date(event.registration_deadline), 'MMM d')}
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => {
+                                toggleFavorite(event.id);
+                                toast({
+                                  title: isFavorite(event.id) ? 'Removed from saved' : 'Saved to favorites',
+                                  description: isFavorite(event.id) 
+                                    ? 'Event removed from your saved list.' 
+                                    : 'View saved events in your dashboard.',
+                                });
+                              }}
+                              className="h-8 w-8"
+                            >
+                              <Heart 
+                                size={16} 
+                                className={isFavorite(event.id) ? 'fill-primary text-primary' : ''} 
+                              />
+                            </Button>
+                            <button
+                              onClick={() => setSelectedEvent(event)}
+                              disabled={!isRegistrationOpen(event)}
+                              className="px-4 py-2 border divider hover:bg-foreground hover:text-background transition-colors font-sans-nav text-xs tracking-wider disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              {isRegistrationOpen(event) ? 'Register' : 'Registration Closed'}
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>
