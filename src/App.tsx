@@ -10,6 +10,8 @@ import AboutPage from "./pages/AboutPage";
 import ResourcesPage from "./pages/ResourcesPage";
 import EventsPage from "./pages/EventsPage";
 import AuthPage from "./pages/AuthPage";
+import UserAuthPage from "./pages/UserAuthPage";
+import DashboardPage from "./pages/DashboardPage";
 import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 
@@ -27,6 +29,8 @@ const App = () => (
             <Route path="/about" element={<AboutPage />} />
             <Route path="/resources" element={<ResourcesPage />} />
             <Route path="/events" element={<EventsPage />} />
+            <Route path="/login" element={<UserAuthPage />} />
+            <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/writings/:slug" element={<WritingPage />} />

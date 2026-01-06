@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -15,6 +16,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import type { User } from '@supabase/supabase-js';
 
 const registrationSchema = z.object({
   name: z.string().trim().min(2, 'Name must be at least 2 characters').max(100),
@@ -33,7 +35,31 @@ interface EventRegistrationFormProps {
 
 const EventRegistrationForm = ({ eventId, eventTitle, onSuccess }: EventRegistrationFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
   const { toast } = useToast();
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        // Pre-fill form with user data
+        form.setValue('email', session.user.email || '');
+        form.setValue('name', session.user.user_metadata?.full_name || '');
+      }
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setUser(session?.user ?? null);
+        if (session?.user) {
+          form.setValue('email', session.user.email || '');
+          form.setValue('name', session.user.user_metadata?.full_name || '');
+        }
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const form = useForm<RegistrationFormData>({
     resolver: zodResolver(registrationSchema),
@@ -57,6 +83,7 @@ const EventRegistrationForm = ({ eventId, eventTitle, onSuccess }: EventRegistra
           email: data.email,
           phone: data.phone || null,
           notes: data.notes || null,
+          user_id: user?.id || null, // Link to user account if logged in
         });
 
       if (error) {
@@ -94,6 +121,12 @@ const EventRegistrationForm = ({ eventId, eventTitle, onSuccess }: EventRegistra
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        {!user && (
+          <div className="p-3 bg-muted/50 border divider text-sm text-muted-foreground mb-4">
+            <Link to="/login" className="text-primary hover:underline">Sign in</Link> to track your registrations in your dashboard.
+          </div>
+        )}
+
         <FormField
           control={form.control}
           name="name"
@@ -124,6 +157,7 @@ const EventRegistrationForm = ({ eventId, eventTitle, onSuccess }: EventRegistra
                   placeholder="you@example.com" 
                   {...field} 
                   className="bg-background"
+                  disabled={!!user}
                 />
               </FormControl>
               <FormMessage />
