@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Menu, X } from "lucide-react";
+import { Menu, X, User, LogIn } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import ThemeToggle from "./ThemeToggle";
+import type { User as SupabaseUser } from "@supabase/supabase-js";
 
 const navItems = [
   { label: "The Codex", href: "#codex" },
@@ -15,6 +17,21 @@ const navItems = [
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [user, setUser] = useState<SupabaseUser | null>(null);
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setUser(session?.user ?? null);
+      }
+    );
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
@@ -45,6 +62,26 @@ const Navigation = () => {
                 </a>
               )
             ))}
+            
+            {/* Auth Link */}
+            {user ? (
+              <Link
+                to="/dashboard"
+                className="font-sans-nav text-muted-foreground hover:text-foreground transition-colors duration-300 flex items-center gap-1"
+              >
+                <User size={16} />
+                Dashboard
+              </Link>
+            ) : (
+              <Link
+                to="/login"
+                className="font-sans-nav text-muted-foreground hover:text-foreground transition-colors duration-300 flex items-center gap-1"
+              >
+                <LogIn size={16} />
+                Sign In
+              </Link>
+            )}
+            
             <ThemeToggle />
           </div>
 
@@ -86,6 +123,27 @@ const Navigation = () => {
                   </a>
                 )
               ))}
+              
+              {/* Mobile Auth Link */}
+              {user ? (
+                <Link
+                  to="/dashboard"
+                  onClick={() => setIsOpen(false)}
+                  className="font-sans-nav text-muted-foreground hover:text-foreground transition-colors duration-300 flex items-center gap-1"
+                >
+                  <User size={16} />
+                  Dashboard
+                </Link>
+              ) : (
+                <Link
+                  to="/login"
+                  onClick={() => setIsOpen(false)}
+                  className="font-sans-nav text-muted-foreground hover:text-foreground transition-colors duration-300 flex items-center gap-1"
+                >
+                  <LogIn size={16} />
+                  Sign In
+                </Link>
+              )}
             </div>
           </div>
         )}

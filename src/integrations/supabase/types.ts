@@ -69,6 +69,7 @@ export type Database = {
           phone: string | null
           registered_at: string
           status: string | null
+          user_id: string | null
         }
         Insert: {
           email: string
@@ -79,6 +80,7 @@ export type Database = {
           phone?: string | null
           registered_at?: string
           status?: string | null
+          user_id?: string | null
         }
         Update: {
           email?: string
@@ -89,6 +91,7 @@ export type Database = {
           phone?: string | null
           registered_at?: string
           status?: string | null
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -175,6 +178,33 @@ export type Database = {
           id?: string
           subscribed_at?: string
           unsubscribed_at?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string | null
+          full_name: string | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
