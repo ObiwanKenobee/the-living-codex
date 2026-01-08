@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { ArrowLeft, Mail } from 'lucide-react';
+import { ArrowLeft, Mail, Chrome } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import Navigation from '@/components/Navigation';
@@ -126,6 +126,27 @@ const UserAuthPage = () => {
         variant: 'destructive',
       });
     } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    setIsSubmitting(true);
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/confirm`,
+        },
+      });
+
+      if (error) throw error;
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to sign in with Google.',
+        variant: 'destructive',
+      });
       setIsSubmitting(false);
     }
   };
@@ -334,6 +355,30 @@ const UserAuthPage = () => {
                     </Button>
                   </form>
                 </Form>
+
+                <div className="mt-6">
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                      <div className="w-full border-t divider" />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                      <span className="bg-card px-2 text-muted-foreground">
+                        Or continue with
+                      </span>
+                    </div>
+                  </div>
+
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full mt-4"
+                    onClick={handleGoogleLogin}
+                    disabled={isSubmitting}
+                  >
+                    <Chrome className="mr-2 h-4 w-4" />
+                    Google
+                  </Button>
+                </div>
 
                 <div className="mt-6 pt-6 border-t divider text-center">
                   <button
