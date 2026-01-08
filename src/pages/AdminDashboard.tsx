@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
-import { LogOut, Users, Mail, Calendar, CalendarPlus, RefreshCw } from 'lucide-react';
+import { LogOut, Users, Mail, Calendar, CalendarPlus, RefreshCw, Bell } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
@@ -79,6 +79,30 @@ const AdminDashboard = () => {
     navigate('/auth');
   };
 
+  const [isSendingReminders, setIsSendingReminders] = useState(false);
+
+  const handleSendReminders = async () => {
+    setIsSendingReminders(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('send-event-reminders');
+      
+      if (error) throw error;
+      
+      toast({
+        title: 'Reminders Sent',
+        description: `Processed ${data?.results?.length || 0} reminder emails.`,
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to send reminders.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSendingReminders(false);
+    }
+  };
+
   // Fetch newsletter subscribers
   const { data: subscribers, refetch: refetchSubscribers } = useQuery({
     queryKey: ['admin-subscribers'],
@@ -146,10 +170,21 @@ const AdminDashboard = () => {
               Signed in as {user?.email}
             </p>
           </div>
-          <Button variant="outline" size="sm" onClick={handleSignOut}>
-            <LogOut size={14} className="mr-2" />
-            Sign Out
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleSendReminders}
+              disabled={isSendingReminders}
+            >
+              <Bell size={14} className="mr-2" />
+              {isSendingReminders ? 'Sending...' : 'Send Reminders'}
+            </Button>
+            <Button variant="outline" size="sm" onClick={handleSignOut}>
+              <LogOut size={14} className="mr-2" />
+              Sign Out
+            </Button>
+          </div>
         </div>
       </header>
 
