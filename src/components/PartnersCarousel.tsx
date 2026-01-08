@@ -1,29 +1,43 @@
 import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Partner {
+  id: string;
   name: string;
-  logoUrl: string;
+  logo_url: string | null;
+  website_url: string | null;
 }
-
-const partners: Partner[] = [
-  { name: 'Ethical Living Institute', logoUrl: '/placeholder.svg' },
-  { name: 'Green Future Foundation', logoUrl: '/placeholder.svg' },
-  { name: 'Mindful Communities Network', logoUrl: '/placeholder.svg' },
-  { name: 'Sustainable Spaces Alliance', logoUrl: '/placeholder.svg' },
-  { name: 'Global Wisdom Council', logoUrl: '/placeholder.svg' },
-  { name: 'Earth Harmony Project', logoUrl: '/placeholder.svg' },
-];
 
 const PartnersCarousel = () => {
   const [position, setPosition] = useState(0);
 
+  const { data: partners = [] } = useQuery({
+    queryKey: ['partners'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('partners')
+        .select('id, name, logo_url, website_url')
+        .eq('is_active', true)
+        .order('display_order', { ascending: true });
+      
+      if (error) throw error;
+      return data as Partner[];
+    },
+  });
+
   useEffect(() => {
+    if (partners.length === 0) return;
+    
     const interval = setInterval(() => {
       setPosition((prev) => (prev + 1) % partners.length);
     }, 3000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [partners.length]);
+
+  // Don't render if no partners
+  if (partners.length === 0) return null;
 
   // Double the array for seamless looping
   const displayPartners = [...partners, ...partners];
@@ -44,16 +58,27 @@ const PartnersCarousel = () => {
           }}
         >
           {displayPartners.map((partner, index) => (
-            <div
-              key={`${partner.name}-${index}`}
+            <a
+              key={`${partner.id}-${index}`}
+              href={partner.website_url || '#'}
+              target={partner.website_url ? '_blank' : undefined}
+              rel="noopener noreferrer"
               className="flex-shrink-0 w-40 h-20 flex items-center justify-center grayscale hover:grayscale-0 transition-all duration-300 opacity-60 hover:opacity-100"
             >
-              <div className="w-full h-full flex items-center justify-center border divider bg-card px-4">
-                <span className="text-xs text-center font-sans-nav text-muted-foreground">
-                  {partner.name}
-                </span>
-              </div>
-            </div>
+              {partner.logo_url ? (
+                <img 
+                  src={partner.logo_url} 
+                  alt={partner.name}
+                  className="max-w-full max-h-full object-contain"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center border divider bg-card px-4">
+                  <span className="text-xs text-center font-sans-nav text-muted-foreground">
+                    {partner.name}
+                  </span>
+                </div>
+              )}
+            </a>
           ))}
         </div>
 
