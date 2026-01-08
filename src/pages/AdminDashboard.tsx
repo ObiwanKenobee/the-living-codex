@@ -16,6 +16,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import EventsManager from '@/components/admin/EventsManager';
+import PartnersManager from '@/components/admin/PartnersManager';
 import CSVExport from '@/components/admin/CSVExport';
 import type { User, Session } from '@supabase/supabase-js';
 
@@ -226,6 +227,7 @@ const AdminDashboard = () => {
         <Tabs defaultValue="events" className="w-full">
           <TabsList className="mb-6">
             <TabsTrigger value="events">Events</TabsTrigger>
+            <TabsTrigger value="partners">Partners</TabsTrigger>
             <TabsTrigger value="registrations">Registrations</TabsTrigger>
             <TabsTrigger value="subscribers">Subscribers</TabsTrigger>
             <TabsTrigger value="messages">Messages</TabsTrigger>
@@ -234,6 +236,11 @@ const AdminDashboard = () => {
           {/* Events Tab */}
           <TabsContent value="events">
             <EventsManager />
+          </TabsContent>
+
+          {/* Partners Tab */}
+          <TabsContent value="partners">
+            <PartnersManager />
           </TabsContent>
 
           {/* Subscribers Tab */}
