@@ -8,6 +8,7 @@ import PracticeSection from "@/components/PracticeSection";
 import WritingsSection from "@/components/WritingsSection";
 import EthosSection from "@/components/EthosSection";
 import ContactSection from "@/components/ContactSection";
+import PartnersCarousel from "@/components/PartnersCarousel";
 import Footer from "@/components/Footer";
 
 const Index = () => {
@@ -23,6 +24,7 @@ const Index = () => {
         <PracticeSection />
         <WritingsSection />
         <EthosSection />
+        <PartnersCarousel />
         <ContactSection />
       </main>
       <Footer />
