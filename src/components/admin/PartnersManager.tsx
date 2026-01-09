@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Trash2, Edit2, GripVertical, ExternalLink } from 'lucide-react';
+import { Plus, Trash2, Edit2, GripVertical, ExternalLink, BarChart3 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
@@ -29,6 +29,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import PartnerCSVImport from './PartnerCSVImport';
+import PartnerAnalytics from './PartnerAnalytics';
 
 type PartnerTier = 'gold' | 'silver' | 'bronze';
 
@@ -52,6 +54,7 @@ const PartnersManager = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [showAnalytics, setShowAnalytics] = useState(false);
   const [editingPartner, setEditingPartner] = useState<Partner | null>(null);
   const [formData, setFormData] = useState({
     name: '',
@@ -263,209 +266,224 @@ const PartnersManager = () => {
   };
 
   return (
-    <div className="border divider bg-card overflow-hidden">
-      <div className="p-4 border-b divider flex items-center justify-between">
-        <h2 className="font-light">Partners & Affiliates</h2>
-        <Dialog open={isDialogOpen} onOpenChange={(open) => {
-          if (!open) resetForm();
-          setIsDialogOpen(open);
-        }}>
-          <DialogTrigger asChild>
-            <Button size="sm">
-              <Plus size={14} className="mr-2" />
-              Add Partner
+    <div className="space-y-6">
+      {showAnalytics && <PartnerAnalytics />}
+      
+      <div className="border divider bg-card overflow-hidden">
+        <div className="p-4 border-b divider flex items-center justify-between">
+          <h2 className="font-light">Partners & Affiliates</h2>
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => setShowAnalytics(!showAnalytics)}
+            >
+              <BarChart3 size={14} className="mr-2" />
+              {showAnalytics ? 'Hide Analytics' : 'Analytics'}
             </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>
-                {editingPartner ? 'Edit Partner' : 'Add New Partner'}
-              </DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <Label htmlFor="name">Partner Name *</Label>
-                <Input
-                  id="name"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  required
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="tier">Tier</Label>
-                <Select
-                  value={formData.tier}
-                  onValueChange={(value: PartnerTier) => setFormData({ ...formData, tier: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="gold">🥇 Gold</SelectItem>
-                    <SelectItem value="silver">🥈 Silver</SelectItem>
-                    <SelectItem value="bronze">🥉 Bronze</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div>
-                <Label htmlFor="logo">Logo</Label>
-                <Input
-                  id="logo"
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => setLogoFile(e.target.files?.[0] || null)}
-                />
-                {editingPartner?.logo_url && !logoFile && (
-                  <div className="mt-2">
-                    <img 
-                      src={editingPartner.logo_url} 
-                      alt="Current logo" 
-                      className="h-12 object-contain"
+            <PartnerCSVImport />
+            <Dialog open={isDialogOpen} onOpenChange={(open) => {
+              if (!open) resetForm();
+              setIsDialogOpen(open);
+            }}>
+              <DialogTrigger asChild>
+                <Button size="sm">
+                  <Plus size={14} className="mr-2" />
+                  Add Partner
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>
+                    {editingPartner ? 'Edit Partner' : 'Add New Partner'}
+                  </DialogTitle>
+                </DialogHeader>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div>
+                    <Label htmlFor="name">Partner Name *</Label>
+                    <Input
+                      id="name"
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      required
                     />
                   </div>
-                )}
-              </div>
-              
-              <div>
-                <Label htmlFor="website">Website URL</Label>
-                <Input
-                  id="website"
-                  type="url"
-                  value={formData.website_url}
-                  onChange={(e) => setFormData({ ...formData, website_url: e.target.value })}
-                  placeholder="https://example.com"
-                />
-              </div>
-              
-              <div className="flex items-center gap-2">
-                <Switch
-                  id="is_active"
-                  checked={formData.is_active}
-                  onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
-                />
-                <Label htmlFor="is_active">Active</Label>
-              </div>
-              
-              <div className="flex justify-end gap-2">
-                <Button type="button" variant="outline" onClick={resetForm}>
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={isUploading || !formData.name}>
-                  {isUploading ? 'Saving...' : editingPartner ? 'Update' : 'Add'}
-                </Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
-      </div>
-
-      <div className="overflow-x-auto">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-12"></TableHead>
-              <TableHead>Logo</TableHead>
-              <TableHead>Name</TableHead>
-              <TableHead>Tier</TableHead>
-              <TableHead>Website</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="w-24">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoading ? (
-              <TableRow>
-                <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                  Loading...
-                </TableCell>
-              </TableRow>
-            ) : partners?.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                  No partners yet. Add your first partner above.
-                </TableCell>
-              </TableRow>
-            ) : (
-              partners?.map((partner) => (
-                <TableRow 
-                  key={partner.id}
-                  draggable
-                  onDragStart={(e) => handleDragStart(e, partner.id)}
-                  onDragOver={(e) => handleDragOver(e, partner.id)}
-                  onDragEnd={handleDragEnd}
-                  className={draggedId === partner.id ? 'opacity-50' : ''}
-                >
-                  <TableCell>
-                    <GripVertical size={14} className="text-muted-foreground cursor-grab active:cursor-grabbing" />
-                  </TableCell>
-                  <TableCell>
-                    {partner.logo_url ? (
-                      <img 
-                        src={partner.logo_url} 
-                        alt={partner.name} 
-                        className="h-8 w-16 object-contain"
-                      />
-                    ) : (
-                      <div className="h-8 w-16 bg-muted flex items-center justify-center text-xs text-muted-foreground">
-                        No logo
+                  
+                  <div>
+                    <Label htmlFor="tier">Tier</Label>
+                    <Select
+                      value={formData.tier}
+                      onValueChange={(value: PartnerTier) => setFormData({ ...formData, tier: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="gold">🥇 Gold</SelectItem>
+                        <SelectItem value="silver">🥈 Silver</SelectItem>
+                        <SelectItem value="bronze">🥉 Bronze</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="logo">Logo</Label>
+                    <Input
+                      id="logo"
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => setLogoFile(e.target.files?.[0] || null)}
+                    />
+                    {editingPartner?.logo_url && !logoFile && (
+                      <div className="mt-2">
+                        <img 
+                          src={editingPartner.logo_url} 
+                          alt="Current logo" 
+                          className="h-12 object-contain"
+                        />
                       </div>
                     )}
-                  </TableCell>
-                  <TableCell className="font-medium">{partner.name}</TableCell>
-                  <TableCell>
-                    <span className={`text-xs px-2 py-1 rounded capitalize ${tierColors[partner.tier || 'silver']}`}>
-                      {partner.tier || 'silver'}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    {partner.website_url ? (
-                      <a 
-                        href={partner.website_url} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-1"
-                      >
-                        Visit <ExternalLink size={12} />
-                      </a>
-                    ) : (
-                      <span className="text-muted-foreground text-sm">—</span>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <span className={`text-xs px-2 py-1 rounded ${
-                      partner.is_active 
-                        ? 'bg-primary/10 text-primary'
-                        : 'bg-muted text-muted-foreground'
-                    }`}>
-                      {partner.is_active ? 'Active' : 'Inactive'}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1">
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={() => handleEdit(partner)}
-                      >
-                        <Edit2 size={14} />
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={() => deleteMutation.mutate(partner.id)}
-                      >
-                        <Trash2 size={14} />
-                      </Button>
-                    </div>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="website">Website URL</Label>
+                    <Input
+                      id="website"
+                      type="url"
+                      value={formData.website_url}
+                      onChange={(e) => setFormData({ ...formData, website_url: e.target.value })}
+                      placeholder="https://example.com"
+                    />
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      id="is_active"
+                      checked={formData.is_active}
+                      onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
+                    />
+                    <Label htmlFor="is_active">Active</Label>
+                  </div>
+                  
+                  <div className="flex justify-end gap-2">
+                    <Button type="button" variant="outline" onClick={resetForm}>
+                      Cancel
+                    </Button>
+                    <Button type="submit" disabled={isUploading || !formData.name}>
+                      {isUploading ? 'Saving...' : editingPartner ? 'Update' : 'Add'}
+                    </Button>
+                  </div>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </div>
+
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-12"></TableHead>
+                <TableHead>Logo</TableHead>
+                <TableHead>Name</TableHead>
+                <TableHead>Tier</TableHead>
+                <TableHead>Website</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="w-24">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {isLoading ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                    Loading...
                   </TableCell>
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+              ) : partners?.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                    No partners yet. Add your first partner above.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                partners?.map((partner) => (
+                  <TableRow 
+                    key={partner.id}
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, partner.id)}
+                    onDragOver={(e) => handleDragOver(e, partner.id)}
+                    onDragEnd={handleDragEnd}
+                    className={draggedId === partner.id ? 'opacity-50' : ''}
+                  >
+                    <TableCell>
+                      <GripVertical size={14} className="text-muted-foreground cursor-grab active:cursor-grabbing" />
+                    </TableCell>
+                    <TableCell>
+                      {partner.logo_url ? (
+                        <img 
+                          src={partner.logo_url} 
+                          alt={partner.name} 
+                          className="h-8 w-16 object-contain"
+                        />
+                      ) : (
+                        <div className="h-8 w-16 bg-muted flex items-center justify-center text-xs text-muted-foreground">
+                          No logo
+                        </div>
+                      )}
+                    </TableCell>
+                    <TableCell className="font-medium">{partner.name}</TableCell>
+                    <TableCell>
+                      <span className={`text-xs px-2 py-1 rounded capitalize ${tierColors[partner.tier || 'silver']}`}>
+                        {partner.tier || 'silver'}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      {partner.website_url ? (
+                        <a 
+                          href={partner.website_url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-1"
+                        >
+                          Visit <ExternalLink size={12} />
+                        </a>
+                      ) : (
+                        <span className="text-muted-foreground text-sm">—</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <span className={`text-xs px-2 py-1 rounded ${
+                        partner.is_active 
+                          ? 'bg-primary/10 text-primary'
+                          : 'bg-muted text-muted-foreground'
+                      }`}>
+                        {partner.is_active ? 'Active' : 'Inactive'}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => handleEdit(partner)}
+                        >
+                          <Edit2 size={14} />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => deleteMutation.mutate(partner.id)}
+                        >
+                          <Trash2 size={14} />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </div>
     </div>
   );
