@@ -189,6 +189,7 @@ export type Database = {
           is_active: boolean | null
           logo_url: string | null
           name: string
+          tier: string | null
           updated_at: string
           website_url: string | null
         }
@@ -199,6 +200,7 @@ export type Database = {
           is_active?: boolean | null
           logo_url?: string | null
           name: string
+          tier?: string | null
           updated_at?: string
           website_url?: string | null
         }
@@ -209,6 +211,7 @@ export type Database = {
           is_active?: boolean | null
           logo_url?: string | null
           name?: string
+          tier?: string | null
           updated_at?: string
           website_url?: string | null
         }
