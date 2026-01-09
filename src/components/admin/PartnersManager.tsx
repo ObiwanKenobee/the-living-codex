@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, Trash2, Edit2, GripVertical, ExternalLink } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -22,6 +22,15 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+
+type PartnerTier = 'gold' | 'silver' | 'bronze';
 
 interface Partner {
   id: string;
@@ -30,7 +39,14 @@ interface Partner {
   website_url: string | null;
   display_order: number;
   is_active: boolean;
+  tier: PartnerTier;
 }
+
+const tierColors: Record<PartnerTier, string> = {
+  gold: 'bg-amber-500/20 text-amber-700 dark:text-amber-400',
+  silver: 'bg-slate-400/20 text-slate-600 dark:text-slate-300',
+  bronze: 'bg-orange-600/20 text-orange-700 dark:text-orange-400',
+};
 
 const PartnersManager = () => {
   const { toast } = useToast();
@@ -41,9 +57,12 @@ const PartnersManager = () => {
     name: '',
     website_url: '',
     is_active: true,
+    tier: 'silver' as PartnerTier,
   });
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [draggedId, setDraggedId] = useState<string | null>(null);
+  const dragOverId = useRef<string | null>(null);
 
   const { data: partners, isLoading } = useQuery({
     queryKey: ['admin-partners'],
@@ -79,13 +98,13 @@ const PartnersManager = () => {
     mutationFn: async (data: typeof formData) => {
       setIsUploading(true);
       
-      // First create the partner to get an ID
       const { data: partner, error } = await supabase
         .from('partners')
         .insert({
           name: data.name,
           website_url: data.website_url || null,
           is_active: data.is_active,
+          tier: data.tier,
           display_order: (partners?.length || 0) + 1,
         })
         .select()
@@ -93,7 +112,6 @@ const PartnersManager = () => {
       
       if (error) throw error;
       
-      // Upload logo if provided
       if (logoFile && partner) {
         const logoUrl = await uploadLogo(logoFile, partner.id);
         await supabase
@@ -131,6 +149,7 @@ const PartnersManager = () => {
           name: data.name,
           website_url: data.website_url || null,
           is_active: data.is_active,
+          tier: data.tier,
           logo_url: logoUrl,
         })
         .eq('id', id);
@@ -146,6 +165,26 @@ const PartnersManager = () => {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
     },
     onSettled: () => setIsUploading(false),
+  });
+
+  const reorderMutation = useMutation({
+    mutationFn: async (reorderedPartners: Partner[]) => {
+      const updates = reorderedPartners.map((partner, index) => 
+        supabase
+          .from('partners')
+          .update({ display_order: index + 1 })
+          .eq('id', partner.id)
+      );
+      
+      await Promise.all(updates);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-partners'] });
+      toast({ title: 'Order updated' });
+    },
+    onError: (error: any) => {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    },
   });
 
   const deleteMutation = useMutation({
@@ -166,8 +205,38 @@ const PartnersManager = () => {
     },
   });
 
+  const handleDragStart = (e: React.DragEvent, partnerId: string) => {
+    setDraggedId(partnerId);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragOver = (e: React.DragEvent, partnerId: string) => {
+    e.preventDefault();
+    dragOverId.current = partnerId;
+  };
+
+  const handleDragEnd = () => {
+    if (!draggedId || !dragOverId.current || !partners) {
+      setDraggedId(null);
+      return;
+    }
+
+    const draggedIndex = partners.findIndex(p => p.id === draggedId);
+    const dropIndex = partners.findIndex(p => p.id === dragOverId.current);
+
+    if (draggedIndex !== dropIndex) {
+      const reordered = [...partners];
+      const [removed] = reordered.splice(draggedIndex, 1);
+      reordered.splice(dropIndex, 0, removed);
+      reorderMutation.mutate(reordered);
+    }
+
+    setDraggedId(null);
+    dragOverId.current = null;
+  };
+
   const resetForm = () => {
-    setFormData({ name: '', website_url: '', is_active: true });
+    setFormData({ name: '', website_url: '', is_active: true, tier: 'silver' });
     setLogoFile(null);
     setEditingPartner(null);
     setIsDialogOpen(false);
@@ -179,6 +248,7 @@ const PartnersManager = () => {
       name: partner.name,
       website_url: partner.website_url || '',
       is_active: partner.is_active,
+      tier: partner.tier || 'silver',
     });
     setIsDialogOpen(true);
   };
@@ -221,6 +291,23 @@ const PartnersManager = () => {
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   required
                 />
+              </div>
+              
+              <div>
+                <Label htmlFor="tier">Tier</Label>
+                <Select
+                  value={formData.tier}
+                  onValueChange={(value: PartnerTier) => setFormData({ ...formData, tier: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="gold">🥇 Gold</SelectItem>
+                    <SelectItem value="silver">🥈 Silver</SelectItem>
+                    <SelectItem value="bronze">🥉 Bronze</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               
               <div>
@@ -282,6 +369,7 @@ const PartnersManager = () => {
               <TableHead className="w-12"></TableHead>
               <TableHead>Logo</TableHead>
               <TableHead>Name</TableHead>
+              <TableHead>Tier</TableHead>
               <TableHead>Website</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="w-24">Actions</TableHead>
@@ -290,21 +378,28 @@ const PartnersManager = () => {
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                   Loading...
                 </TableCell>
               </TableRow>
             ) : partners?.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                   No partners yet. Add your first partner above.
                 </TableCell>
               </TableRow>
             ) : (
               partners?.map((partner) => (
-                <TableRow key={partner.id}>
+                <TableRow 
+                  key={partner.id}
+                  draggable
+                  onDragStart={(e) => handleDragStart(e, partner.id)}
+                  onDragOver={(e) => handleDragOver(e, partner.id)}
+                  onDragEnd={handleDragEnd}
+                  className={draggedId === partner.id ? 'opacity-50' : ''}
+                >
                   <TableCell>
-                    <GripVertical size={14} className="text-muted-foreground cursor-grab" />
+                    <GripVertical size={14} className="text-muted-foreground cursor-grab active:cursor-grabbing" />
                   </TableCell>
                   <TableCell>
                     {partner.logo_url ? (
@@ -320,6 +415,11 @@ const PartnersManager = () => {
                     )}
                   </TableCell>
                   <TableCell className="font-medium">{partner.name}</TableCell>
+                  <TableCell>
+                    <span className={`text-xs px-2 py-1 rounded capitalize ${tierColors[partner.tier || 'silver']}`}>
+                      {partner.tier || 'silver'}
+                    </span>
+                  </TableCell>
                   <TableCell>
                     {partner.website_url ? (
                       <a 
