@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -12,12 +12,6 @@ interface Partner {
   tier: PartnerTier;
 }
 
-const tierOrder: Record<PartnerTier, number> = {
-  gold: 1,
-  silver: 2,
-  bronze: 3,
-};
-
 const tierLabels: Record<PartnerTier, string> = {
   gold: 'Gold Partners',
   silver: 'Silver Partners',
@@ -26,6 +20,7 @@ const tierLabels: Record<PartnerTier, string> = {
 
 const PartnersCarousel = () => {
   const [position, setPosition] = useState(0);
+  const trackedImpressions = useRef<Set<string>>(new Set());
 
   const { data: partners = [] } = useQuery({
     queryKey: ['partners'],
@@ -40,6 +35,36 @@ const PartnersCarousel = () => {
       return data as Partner[];
     },
   });
+
+  // Track impression for a partner
+  const trackImpression = useCallback(async (partnerId: string) => {
+    if (trackedImpressions.current.has(partnerId)) return;
+    trackedImpressions.current.add(partnerId);
+
+    await supabase.from('partner_analytics').insert({
+      partner_id: partnerId,
+      event_type: 'impression',
+      user_agent: navigator.userAgent,
+      referrer: document.referrer || null,
+    });
+  }, []);
+
+  // Track click for a partner
+  const trackClick = async (partnerId: string) => {
+    await supabase.from('partner_analytics').insert({
+      partner_id: partnerId,
+      event_type: 'click',
+      user_agent: navigator.userAgent,
+      referrer: document.referrer || null,
+    });
+  };
+
+  // Track impressions when partners are loaded
+  useEffect(() => {
+    partners.forEach(partner => {
+      trackImpression(partner.id);
+    });
+  }, [partners, trackImpression]);
 
   // Group partners by tier
   const partnersByTier = partners.reduce((acc, partner) => {
@@ -65,6 +90,11 @@ const PartnersCarousel = () => {
 
   if (partners.length === 0) return null;
 
+  const handlePartnerClick = (partner: Partner, e: React.MouseEvent) => {
+    trackClick(partner.id);
+    // Allow default link behavior to continue
+  };
+
   return (
     <section className="py-16 bg-muted/30 border-y divider overflow-hidden">
       <div className="container-wide mb-8">
@@ -86,6 +116,7 @@ const PartnersCarousel = () => {
                   href={partner.website_url || '#'}
                   target={partner.website_url ? '_blank' : undefined}
                   rel="noopener noreferrer"
+                  onClick={(e) => handlePartnerClick(partner, e)}
                   className={`flex-shrink-0 flex items-center justify-center grayscale hover:grayscale-0 transition-all duration-300 opacity-60 hover:opacity-100 ${
                     tier === 'gold' ? 'w-48 h-24' : tier === 'silver' ? 'w-40 h-20' : 'w-32 h-16'
                   }`}
