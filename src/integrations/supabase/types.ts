@@ -279,6 +279,90 @@ export type Database = {
         }
         Relationships: []
       }
+      sponsorship_applications: {
+        Row: {
+          company_name: string
+          contact_name: string
+          created_at: string
+          email: string
+          id: string
+          message: string | null
+          phone: string | null
+          preferred_tier: string
+          status: string | null
+          updated_at: string
+          website_url: string | null
+        }
+        Insert: {
+          company_name: string
+          contact_name: string
+          created_at?: string
+          email: string
+          id?: string
+          message?: string | null
+          phone?: string | null
+          preferred_tier: string
+          status?: string | null
+          updated_at?: string
+          website_url?: string | null
+        }
+        Update: {
+          company_name?: string
+          contact_name?: string
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string | null
+          phone?: string | null
+          preferred_tier?: string
+          status?: string | null
+          updated_at?: string
+          website_url?: string | null
+        }
+        Relationships: []
+      }
+      sponsorship_tiers: {
+        Row: {
+          created_at: string
+          description: string | null
+          display_order: number | null
+          features: Json
+          id: string
+          is_active: boolean | null
+          is_highlighted: boolean | null
+          name: string
+          period: string
+          price: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          features?: Json
+          id?: string
+          is_active?: boolean | null
+          is_highlighted?: boolean | null
+          name: string
+          period?: string
+          price?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          features?: Json
+          id?: string
+          is_active?: boolean | null
+          is_highlighted?: boolean | null
+          name?: string
+          period?: string
+          price?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
