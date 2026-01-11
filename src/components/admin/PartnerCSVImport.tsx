@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { Upload, FileText, X, Check } from 'lucide-react';
+import { Upload, FileText, X, Check, Download } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
@@ -183,6 +183,26 @@ const PartnerCSVImport = () => {
               <li><strong>tier</strong> - gold, silver, or bronze</li>
               <li><strong>is_active</strong> - true or false</li>
             </ul>
+            <Button 
+              variant="link" 
+              size="sm" 
+              className="p-0 h-auto mt-2"
+              onClick={() => {
+                const template = 'name,website_url,tier,is_active\n"Example Partner","https://example.com","gold","true"\n"Another Partner","https://another.com","silver","true"';
+                const blob = new Blob([template], { type: 'text/csv' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = 'partner-import-template.csv';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+              }}
+            >
+              <FileText size={14} className="mr-1" />
+              Download CSV template
+            </Button>
           </div>
 
           <div className="border-2 border-dashed divider rounded-lg p-6 text-center">
