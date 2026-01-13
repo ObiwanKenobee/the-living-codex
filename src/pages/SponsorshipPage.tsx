@@ -6,6 +6,7 @@ import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import SponsorshipApplicationForm from '@/components/SponsorshipApplicationForm';
+import SponsorTestimonials from '@/components/SponsorTestimonials';
 
 interface SponsorshipTier {
   id: string;
@@ -144,6 +145,9 @@ const SponsorshipPage = () => {
               })}
             </div>
           )}
+
+          {/* Testimonials Section */}
+          <SponsorTestimonials />
 
           {/* Benefits Section */}
           <div className="text-center border-t border-border pt-16 mb-16">

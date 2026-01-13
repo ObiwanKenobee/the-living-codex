@@ -69,6 +69,24 @@ const SponsorshipApplicationForm = ({ tiers, preselectedTier }: SponsorshipAppli
 
       if (error) throw error;
 
+      // Send email notification
+      try {
+        await supabase.functions.invoke('send-sponsorship-notification', {
+          body: {
+            company_name: data.company_name,
+            contact_name: data.contact_name,
+            email: data.email,
+            phone: data.phone,
+            website_url: data.website_url,
+            preferred_tier: data.preferred_tier,
+            message: data.message,
+          },
+        });
+      } catch (emailError) {
+        console.error('Failed to send notification email:', emailError);
+        // Don't fail the submission if email fails
+      }
+
       setIsSubmitted(true);
       toast({
         title: 'Application Submitted',
