@@ -16,6 +16,7 @@ import EmailConfirmationPage from "./pages/EmailConfirmationPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import AdminDashboard from "./pages/AdminDashboard";
 import SponsorshipPage from "./pages/SponsorshipPage";
+import SponsorsPage from "./pages/SponsorsPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -39,6 +40,7 @@ const App = () => (
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/sponsorship" element={<SponsorshipPage />} />
+            <Route path="/sponsors" element={<SponsorsPage />} />
             <Route path="/writings/:slug" element={<WritingPage />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { Resend } from "https://esm.sh/resend@2.0.0";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
@@ -28,6 +29,21 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const data: SponsorshipNotificationRequest = await req.json();
     console.log("Received sponsorship application:", data);
+
+    // Initialize Supabase client to fetch admin email from settings
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // Fetch admin notification email from site settings
+    const { data: settingsData } = await supabase
+      .from("site_settings")
+      .select("value")
+      .eq("key", "admin_notification_email")
+      .single();
+
+    const adminEmail = settingsData?.value || null;
+    console.log("Admin email from settings:", adminEmail);
 
     // Send confirmation email to the applicant
     const applicantEmailResponse = await resend.emails.send({
@@ -80,54 +96,62 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("Applicant email sent:", applicantEmailResponse);
 
-    // Send notification email to admin (using a placeholder - in production, use actual admin email)
-    const adminNotificationHtml = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <style>
-          body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; }
-          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-          .alert { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin-bottom: 20px; }
-          .details { background: #f3f4f6; padding: 20px; border-radius: 8px; }
-          .label { font-weight: 600; color: #6b7280; font-size: 12px; text-transform: uppercase; }
-          .value { margin-bottom: 15px; }
-        </style>
-      </head>
-      <body>
-        <div class="container">
-          <div class="alert">
-            <strong>🎉 New Sponsorship Application!</strong>
-          </div>
-          
-          <div class="details">
-            <div class="label">Company</div>
-            <div class="value">${data.company_name}</div>
-            
-            <div class="label">Contact Name</div>
-            <div class="value">${data.contact_name}</div>
-            
-            <div class="label">Email</div>
-            <div class="value"><a href="mailto:${data.email}">${data.email}</a></div>
-            
-            ${data.phone ? `<div class="label">Phone</div><div class="value">${data.phone}</div>` : ''}
-            
-            ${data.website_url ? `<div class="label">Website</div><div class="value"><a href="${data.website_url}">${data.website_url}</a></div>` : ''}
-            
-            <div class="label">Preferred Tier</div>
-            <div class="value"><strong>${data.preferred_tier}</strong></div>
-            
-            ${data.message ? `<div class="label">Message</div><div class="value">${data.message}</div>` : ''}
-          </div>
-          
-          <p style="margin-top: 20px;">Please review this application in the admin dashboard.</p>
-        </div>
-      </body>
-      </html>
-    `;
-
-    // Note: In production, you'd send this to the actual admin email
-    console.log("Admin notification prepared for:", data.company_name);
+    // Send notification email to admin if email is configured
+    if (adminEmail && adminEmail !== 'admin@example.com') {
+      const adminEmailResponse = await resend.emails.send({
+        from: "Sponsorship Notifications <onboarding@resend.dev>",
+        to: [adminEmail],
+        reply_to: data.email,
+        subject: `[New Application] ${data.company_name} - ${data.preferred_tier} Tier`,
+        html: `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <style>
+              body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; }
+              .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+              .alert { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin-bottom: 20px; }
+              .details { background: #f3f4f6; padding: 20px; border-radius: 8px; }
+              .label { font-weight: 600; color: #6b7280; font-size: 12px; text-transform: uppercase; }
+              .value { margin-bottom: 15px; }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="alert">
+                <strong>🎉 New Sponsorship Application!</strong>
+              </div>
+              
+              <div class="details">
+                <div class="label">Company</div>
+                <div class="value">${data.company_name}</div>
+                
+                <div class="label">Contact Name</div>
+                <div class="value">${data.contact_name}</div>
+                
+                <div class="label">Email</div>
+                <div class="value"><a href="mailto:${data.email}">${data.email}</a></div>
+                
+                ${data.phone ? `<div class="label">Phone</div><div class="value">${data.phone}</div>` : ''}
+                
+                ${data.website_url ? `<div class="label">Website</div><div class="value"><a href="${data.website_url}">${data.website_url}</a></div>` : ''}
+                
+                <div class="label">Preferred Tier</div>
+                <div class="value"><strong>${data.preferred_tier}</strong></div>
+                
+                ${data.message ? `<div class="label">Message</div><div class="value">${data.message}</div>` : ''}
+              </div>
+              
+              <p style="margin-top: 20px;">Please review this application in the admin dashboard.</p>
+            </div>
+          </body>
+          </html>
+        `,
+      });
+      console.log("Admin notification email sent:", adminEmailResponse);
+    } else {
+      console.log("Admin email not configured or is default - skipping admin notification");
+    }
 
     return new Response(
       JSON.stringify({ 
