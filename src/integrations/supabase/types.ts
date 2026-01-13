@@ -279,6 +279,72 @@ export type Database = {
         }
         Relationships: []
       }
+      site_settings: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          key: string
+          updated_at: string
+          value: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          key: string
+          updated_at?: string
+          value: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          key?: string
+          updated_at?: string
+          value?: string
+        }
+        Relationships: []
+      }
+      sponsor_testimonials: {
+        Row: {
+          author_name: string
+          author_role: string
+          company_name: string
+          created_at: string
+          display_order: number | null
+          id: string
+          is_active: boolean | null
+          quote: string
+          tier: string
+          updated_at: string
+        }
+        Insert: {
+          author_name: string
+          author_role: string
+          company_name: string
+          created_at?: string
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          quote: string
+          tier: string
+          updated_at?: string
+        }
+        Update: {
+          author_name?: string
+          author_role?: string
+          company_name?: string
+          created_at?: string
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          quote?: string
+          tier?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       sponsorship_applications: {
         Row: {
           company_name: string

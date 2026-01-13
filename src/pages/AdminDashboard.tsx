@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
-import { LogOut, Users, Mail, Calendar, CalendarPlus, RefreshCw, Bell } from 'lucide-react';
+import { LogOut, Users, Mail, Calendar, CalendarPlus, RefreshCw, Bell, Settings } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
@@ -18,6 +18,8 @@ import {
 import EventsManager from '@/components/admin/EventsManager';
 import PartnersManager from '@/components/admin/PartnersManager';
 import SponsorshipManager from '@/components/admin/SponsorshipManager';
+import TestimonialsManager from '@/components/admin/TestimonialsManager';
+import SiteSettingsManager from '@/components/admin/SiteSettingsManager';
 import CSVExport from '@/components/admin/CSVExport';
 import type { User, Session } from '@supabase/supabase-js';
 
@@ -226,13 +228,18 @@ const AdminDashboard = () => {
 
         {/* Tabs */}
         <Tabs defaultValue="events" className="w-full">
-          <TabsList className="mb-6">
+          <TabsList className="mb-6 flex-wrap">
             <TabsTrigger value="events">Events</TabsTrigger>
             <TabsTrigger value="partners">Partners</TabsTrigger>
             <TabsTrigger value="sponsorship">Sponsorship</TabsTrigger>
+            <TabsTrigger value="testimonials">Testimonials</TabsTrigger>
             <TabsTrigger value="registrations">Registrations</TabsTrigger>
             <TabsTrigger value="subscribers">Subscribers</TabsTrigger>
             <TabsTrigger value="messages">Messages</TabsTrigger>
+            <TabsTrigger value="settings">
+              <Settings size={14} className="mr-1" />
+              Settings
+            </TabsTrigger>
           </TabsList>
 
           {/* Events Tab */}
@@ -248,6 +255,11 @@ const AdminDashboard = () => {
           {/* Sponsorship Tab */}
           <TabsContent value="sponsorship">
             <SponsorshipManager />
+          </TabsContent>
+
+          {/* Testimonials Tab */}
+          <TabsContent value="testimonials">
+            <TestimonialsManager />
           </TabsContent>
 
           {/* Subscribers Tab */}
@@ -426,6 +438,11 @@ const AdminDashboard = () => {
                 </Table>
               </div>
             </div>
+          </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings">
+            <SiteSettingsManager />
           </TabsContent>
         </Tabs>
       </main>
