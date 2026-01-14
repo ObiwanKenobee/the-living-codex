@@ -12,6 +12,7 @@ const navItems = [
   { label: "Writings", href: "#writings" },
   { label: "Events", href: "/events", isRoute: true },
   { label: "Resources", href: "/resources", isRoute: true },
+  { label: "Sponsors", href: "/sponsors", isRoute: true },
   { label: "Sponsorship", href: "/sponsorship", isRoute: true },
   { label: "About", href: "/about", isRoute: true },
 ];
