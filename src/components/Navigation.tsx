@@ -10,10 +10,10 @@ const navItems = [
   { label: "Four Pillars", href: "#pillars" },
   { label: "Habitat One", href: "#habitat" },
   { label: "Writings", href: "#writings" },
+  { label: "Glossary", href: "/glossary", isRoute: true },
   { label: "Events", href: "/events", isRoute: true },
   { label: "Resources", href: "/resources", isRoute: true },
   { label: "Sponsors", href: "/sponsors", isRoute: true },
-  { label: "Sponsorship", href: "/sponsorship", isRoute: true },
   { label: "About", href: "/about", isRoute: true },
 ];
 

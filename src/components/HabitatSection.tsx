@@ -1,4 +1,6 @@
 import FadeInSection from './FadeInSection';
+import CollapsibleSection from './CollapsibleSection';
+import HabitatTimeline from './HabitatTimeline';
 
 const focusAreas = [
   {
@@ -83,13 +85,17 @@ const HabitatSection = () => {
         <FadeInSection delay={200}>
           <div className="mt-16">
             <h3 className="text-xl font-medium mb-8">Current Focus Areas</h3>
-            <div className="grid md:grid-cols-2 gap-6">
+            <div className="space-y-3">
               {focusAreas.map((area, index) => (
-                <div key={area.title} className="p-6 border divider bg-background">
-                  <h4 className="font-medium mb-3">{area.title}</h4>
+                <CollapsibleSection 
+                  key={area.title} 
+                  title={area.title} 
+                  defaultOpen={index === 0}
+                  variant="card"
+                >
                   <p className="text-sm text-muted-foreground mb-4">{area.description}</p>
                   <p className="text-xs font-sans-nav tracking-wide text-primary/70">{area.metrics}</p>
-                </div>
+                </CollapsibleSection>
               ))}
             </div>
           </div>
@@ -125,6 +131,10 @@ const HabitatSection = () => {
               their costs deferred to the future. We prefer slow results that compound.
             </p>
           </div>
+        </FadeInSection>
+
+        <FadeInSection delay={500}>
+          <HabitatTimeline />
         </FadeInSection>
       </div>
     </section>
