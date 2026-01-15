@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import { Menu, X, User, LogIn } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import ThemeToggle from "./ThemeToggle";
+import ReadingModeToggle from "./ReadingModeToggle";
+import BookmarksPanel from "./BookmarksPanel";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
 
 const navItems = [
@@ -84,11 +86,15 @@ const Navigation = () => {
               </Link>
             )}
             
+            <ReadingModeToggle />
+            <BookmarksPanel />
             <ThemeToggle />
           </div>
 
           {/* Mobile Menu Button */}
-          <div className="md:hidden flex items-center gap-2">
+          <div className="md:hidden flex items-center gap-1">
+            <ReadingModeToggle />
+            <BookmarksPanel />
             <ThemeToggle />
             <button
               onClick={() => setIsOpen(!isOpen)}

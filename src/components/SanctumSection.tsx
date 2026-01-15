@@ -1,5 +1,6 @@
 import FadeInSection from './FadeInSection';
 import CollapsibleSection from './CollapsibleSection';
+import SectionBookmarkButton from './SectionBookmarkButton';
 
 const functions = [
   {
@@ -44,12 +45,21 @@ const SanctumSection = () => {
     <section className="section-spacing border-t divider">
       <div className="container-reading">
         <FadeInSection>
-          <p className="font-sans-nav text-muted-foreground mb-4 tracking-widest">
-            IV
-          </p>
-          <h2 className="text-3xl md:text-4xl font-light mb-12">
-            Atlas Sanctum
-          </h2>
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="font-sans-nav text-muted-foreground mb-4 tracking-widest">
+                IV
+              </p>
+              <h2 className="text-3xl md:text-4xl font-light mb-12">
+                Atlas Sanctum
+              </h2>
+            </div>
+            <SectionBookmarkButton 
+              sectionId="sanctum" 
+              sectionTitle="Atlas Sanctum" 
+              parentSection="Physical Sites" 
+            />
+          </div>
         </FadeInSection>
         
         <FadeInSection delay={100}>

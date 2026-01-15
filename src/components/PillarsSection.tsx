@@ -4,6 +4,7 @@ import diagramHuman from '@/assets/diagram-human.png';
 import diagramMoral from '@/assets/diagram-moral.png';
 import FadeInSection from './FadeInSection';
 import CollapsibleSection from './CollapsibleSection';
+import SectionBookmarkButton from './SectionBookmarkButton';
 
 const pillars = [
   {
@@ -149,12 +150,21 @@ const PillarsSection = () => {
       <div className="container-wide">
         <FadeInSection>
           <div className="container-reading mx-auto mb-16">
-            <p className="font-sans-nav text-muted-foreground mb-4 tracking-widest">
-              II
-            </p>
-            <h2 className="text-3xl md:text-4xl font-light mb-8">
-              The Four Pillars
-            </h2>
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="font-sans-nav text-muted-foreground mb-4 tracking-widest">
+                  II
+                </p>
+                <h2 className="text-3xl md:text-4xl font-light mb-8">
+                  The Four Pillars
+                </h2>
+              </div>
+              <SectionBookmarkButton 
+                sectionId="pillars" 
+                sectionTitle="The Four Pillars" 
+                parentSection="Core Framework" 
+              />
+            </div>
             <p className="prose-codex">
               The Codex rests on four foundational pillars—not as separate domains, 
               but as four perspectives on the same underlying reality.

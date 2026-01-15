@@ -1,6 +1,7 @@
 import FadeInSection from './FadeInSection';
 import CollapsibleSection from './CollapsibleSection';
 import HabitatTimeline from './HabitatTimeline';
+import SectionBookmarkButton from './SectionBookmarkButton';
 
 const focusAreas = [
   {
@@ -38,12 +39,21 @@ const HabitatSection = () => {
     <section id="habitat" className="section-spacing border-t divider bg-card">
       <div className="container-reading">
         <FadeInSection>
-          <p className="font-sans-nav text-muted-foreground mb-4 tracking-widest">
-            III
-          </p>
-          <h2 className="text-3xl md:text-4xl font-light mb-12">
-            Atlas Habitat One
-          </h2>
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="font-sans-nav text-muted-foreground mb-4 tracking-widest">
+                III
+              </p>
+              <h2 className="text-3xl md:text-4xl font-light mb-12">
+                Atlas Habitat One
+              </h2>
+            </div>
+            <SectionBookmarkButton 
+              sectionId="habitat" 
+              sectionTitle="Atlas Habitat One" 
+              parentSection="Physical Sites" 
+            />
+          </div>
         </FadeInSection>
         
         <FadeInSection delay={100}>
