@@ -1,5 +1,6 @@
 import { Download } from 'lucide-react';
 import FadeInSection from './FadeInSection';
+import SectionBookmarkButton from './SectionBookmarkButton';
 
 const CodexSection = () => {
   const handleDownloadPDF = () => {
@@ -167,12 +168,21 @@ const CodexSection = () => {
     <section id="codex" className="section-spacing border-t divider">
       <div className="container-reading">
         <FadeInSection>
-          <p className="font-sans-nav text-muted-foreground mb-4 tracking-widest">
-            I
-          </p>
-          <h2 className="text-3xl md:text-4xl font-light mb-12">
-            The Codex
-          </h2>
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="font-sans-nav text-muted-foreground mb-4 tracking-widest">
+                I
+              </p>
+              <h2 className="text-3xl md:text-4xl font-light mb-12">
+                The Codex
+              </h2>
+            </div>
+            <SectionBookmarkButton 
+              sectionId="codex" 
+              sectionTitle="The Codex" 
+              parentSection="Core Framework" 
+            />
+          </div>
         </FadeInSection>
         
         <FadeInSection delay={100}>

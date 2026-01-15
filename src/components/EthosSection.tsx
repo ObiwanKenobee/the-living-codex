@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import FadeInSection from './FadeInSection';
 import CollapsibleSection from './CollapsibleSection';
+import SectionBookmarkButton from './SectionBookmarkButton';
 
 const values = [
   {
@@ -95,12 +96,21 @@ const EthosSection = () => {
     <section id="ethos" className="section-spacing border-t divider bg-card">
       <div className="container-reading">
         <FadeInSection>
-          <p className="font-sans-nav text-muted-foreground mb-4 tracking-widest">
-            VII
-          </p>
-          <h2 className="text-3xl md:text-4xl font-light mb-6">
-            Ethos
-          </h2>
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="font-sans-nav text-muted-foreground mb-4 tracking-widest">
+                VII
+              </p>
+              <h2 className="text-3xl md:text-4xl font-light mb-6">
+                Ethos
+              </h2>
+            </div>
+            <SectionBookmarkButton 
+              sectionId="ethos" 
+              sectionTitle="Ethos" 
+              parentSection="Core Framework" 
+            />
+          </div>
           <p className="prose-codex text-muted-foreground mb-12">
             These are not rules to follow but orientations to embody. They emerge 
             from observation of what enables systems—ecological, social, personal—to 
