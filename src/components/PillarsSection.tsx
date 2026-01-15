@@ -3,6 +3,7 @@ import diagramMaterial from '@/assets/diagram-material.png';
 import diagramHuman from '@/assets/diagram-human.png';
 import diagramMoral from '@/assets/diagram-moral.png';
 import FadeInSection from './FadeInSection';
+import CollapsibleSection from './CollapsibleSection';
 
 const pillars = [
   {
@@ -181,12 +182,16 @@ const PillarsSection = () => {
                     <p className="text-muted-foreground">{pillar.details}</p>
                     
                     {pillar.expanded && (
-                      <div className="mt-8 pt-8 border-t divider space-y-6">
-                        {pillar.expanded.map((item) => (
-                          <div key={item.subtitle}>
-                            <h4 className="font-medium text-sm mb-2">{item.subtitle}</h4>
+                      <div className="mt-8 pt-8 border-t divider space-y-2">
+                        {pillar.expanded.map((item, i) => (
+                          <CollapsibleSection 
+                            key={item.subtitle} 
+                            title={item.subtitle}
+                            defaultOpen={i === 0}
+                            variant="minimal"
+                          >
                             <p className="text-sm text-muted-foreground">{item.content}</p>
-                          </div>
+                          </CollapsibleSection>
                         ))}
                       </div>
                     )}

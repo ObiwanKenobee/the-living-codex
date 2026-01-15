@@ -1,4 +1,5 @@
 import FadeInSection from './FadeInSection';
+import CollapsibleSection from './CollapsibleSection';
 
 const functions = [
   {
@@ -99,31 +100,34 @@ const SanctumSection = () => {
         <FadeInSection delay={300}>
           <div className="mt-16">
             <h3 className="text-xl font-medium mb-8">Core Functions</h3>
-            <div className="grid gap-6">
+            <div className="space-y-3">
               {functions.map((func, index) => (
-                <div key={func.title} className="flex gap-4 items-start">
-                  <span className="text-primary/50 font-sans-nav text-xs mt-1">
-                    {String(index + 1).padStart(2, '0')}
-                  </span>
-                  <div>
-                    <h4 className="font-medium mb-2">{func.title}</h4>
-                    <p className="text-sm text-muted-foreground">{func.description}</p>
-                  </div>
-                </div>
+                <CollapsibleSection 
+                  key={func.title} 
+                  title={`${String(index + 1).padStart(2, '0')}. ${func.title}`}
+                  defaultOpen={index === 0}
+                  variant="default"
+                >
+                  <p className="text-sm text-muted-foreground">{func.description}</p>
+                </CollapsibleSection>
               ))}
             </div>
           </div>
         </FadeInSection>
 
         <FadeInSection delay={400}>
-          <div className="mt-16 p-8 border divider bg-card">
+          <div className="mt-16">
             <h3 className="text-lg font-medium mb-6">Structural Guardrails</h3>
-            <div className="grid md:grid-cols-2 gap-6">
-              {guardrails.map((guardrail) => (
-                <div key={guardrail.principle}>
-                  <h4 className="font-medium text-sm mb-2">{guardrail.principle}</h4>
+            <div className="grid md:grid-cols-2 gap-3">
+              {guardrails.map((guardrail, index) => (
+                <CollapsibleSection 
+                  key={guardrail.principle} 
+                  title={guardrail.principle}
+                  defaultOpen={index === 0}
+                  variant="card"
+                >
                   <p className="text-xs text-muted-foreground">{guardrail.description}</p>
-                </div>
+                </CollapsibleSection>
               ))}
             </div>
           </div>

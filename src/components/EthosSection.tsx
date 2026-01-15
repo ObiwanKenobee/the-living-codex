@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import FadeInSection from './FadeInSection';
+import CollapsibleSection from './CollapsibleSection';
 
 const values = [
   {
@@ -116,25 +118,30 @@ const EthosSection = () => {
                 <p className="prose-codex text-foreground/80 mb-4">
                   {value.description}
                 </p>
-                <p className="prose-codex text-muted-foreground text-sm leading-relaxed">
-                  {value.elaboration}
-                </p>
                 
-                {value.practices && (
-                  <div className="mt-6 p-4 bg-background border divider">
-                    <h4 className="text-xs font-sans-nav tracking-widest text-muted-foreground mb-3">
-                      PRACTICES
-                    </h4>
-                    <ul className="space-y-2">
-                      {value.practices.map((practice, i) => (
-                        <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
-                          <span className="text-primary/40 mt-1">•</span>
-                          {practice}
-                        </li>
-                      ))}
-                    </ul>
+                <CollapsibleSection title="Read More" variant="minimal" defaultOpen={index === 0}>
+                  <div className="space-y-4">
+                    <p className="prose-codex text-muted-foreground text-sm leading-relaxed">
+                      {value.elaboration}
+                    </p>
+                    
+                    {value.practices && (
+                      <div className="mt-4 p-4 bg-background border divider">
+                        <h4 className="text-xs font-sans-nav tracking-widest text-muted-foreground mb-3">
+                          PRACTICES
+                        </h4>
+                        <ul className="space-y-2">
+                          {value.practices.map((practice, i) => (
+                            <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
+                              <span className="text-primary/40 mt-1">•</span>
+                              {practice}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
                   </div>
-                )}
+                </CollapsibleSection>
               </article>
             </FadeInSection>
           ))}
