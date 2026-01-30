@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Bookmark, ChevronDown, ChevronUp, Trash2, X } from 'lucide-react';
+import { Bookmark, Trash2, X } from 'lucide-react';
 import { useSectionBookmarks, SectionBookmark } from '@/hooks/useSectionBookmarks';
 import { Button } from '@/components/ui/button';
 import {
@@ -10,6 +10,7 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import { toast } from 'sonner';
+import BookmarkExport from './BookmarkExport';
 
 const BookmarksPanel = () => {
   const { bookmarks, removeBookmark, clearAllBookmarks } = useSectionBookmarks();
@@ -80,6 +81,11 @@ const BookmarksPanel = () => {
               </Button>
             )}
           </SheetTitle>
+          {bookmarks.length > 0 && (
+            <div className="mt-3">
+              <BookmarkExport bookmarks={bookmarks} />
+            </div>
+          )}
         </SheetHeader>
 
         <div className="py-4 space-y-6 overflow-y-auto max-h-[calc(100vh-120px)]">

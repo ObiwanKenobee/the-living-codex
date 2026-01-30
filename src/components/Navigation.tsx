@@ -5,6 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import ThemeToggle from "./ThemeToggle";
 import ReadingModeToggle from "./ReadingModeToggle";
 import BookmarksPanel from "./BookmarksPanel";
+import CodexSearch from "./CodexSearch";
+import ReadingProgressTracker from "./ReadingProgressTracker";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
 
 const navItems = [
@@ -86,6 +88,8 @@ const Navigation = () => {
               </Link>
             )}
             
+            <CodexSearch variant="icon" />
+            <ReadingProgressTracker />
             <ReadingModeToggle />
             <BookmarksPanel />
             <ThemeToggle />
@@ -93,6 +97,8 @@ const Navigation = () => {
 
           {/* Mobile Menu Button */}
           <div className="md:hidden flex items-center gap-1">
+            <CodexSearch variant="icon" />
+            <ReadingProgressTracker />
             <ReadingModeToggle />
             <BookmarksPanel />
             <ThemeToggle />
