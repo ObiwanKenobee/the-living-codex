@@ -2,6 +2,7 @@ import FadeInSection from './FadeInSection';
 import CollapsibleSection from './CollapsibleSection';
 import HabitatTimeline from './HabitatTimeline';
 import SectionBookmarkButton from './SectionBookmarkButton';
+import SectionShareButton from './SectionShareButton';
 
 const focusAreas = [
   {
@@ -48,11 +49,14 @@ const HabitatSection = () => {
                 Atlas Habitat One
               </h2>
             </div>
-            <SectionBookmarkButton 
-              sectionId="habitat" 
-              sectionTitle="Atlas Habitat One" 
-              parentSection="Physical Sites" 
-            />
+            <div className="flex items-center gap-1">
+              <SectionShareButton sectionId="habitat" sectionTitle="Atlas Habitat One" />
+              <SectionBookmarkButton 
+                sectionId="habitat" 
+                sectionTitle="Atlas Habitat One" 
+                parentSection="Physical Sites" 
+              />
+            </div>
           </div>
         </FadeInSection>
         
