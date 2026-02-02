@@ -1,28 +1,44 @@
-import { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Check, Circle, BookOpen } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { ChevronLeft, ChevronRight, Check, Circle, BookOpen, RotateCcw } from 'lucide-react';
 import { useReadingProgress } from '@/hooks/useReadingProgress';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
 interface SidebarSection {
   id: string;
   title: string;
-  icon?: React.ReactNode;
+  shortcut: string;
 }
 
 const sections: SidebarSection[] = [
-  { id: 'codex', title: 'The Codex' },
-  { id: 'pillars', title: 'Four Pillars' },
-  { id: 'habitat', title: 'Habitat One' },
-  { id: 'sanctum', title: 'Atlas Sanctum' },
-  { id: 'practice', title: 'The Practice' },
-  { id: 'writings', title: 'Field Notes' },
-  { id: 'ethos', title: 'Ethos' },
+  { id: 'codex', title: 'The Codex', shortcut: '1' },
+  { id: 'pillars', title: 'Four Pillars', shortcut: '2' },
+  { id: 'habitat', title: 'Habitat One', shortcut: '3' },
+  { id: 'sanctum', title: 'Atlas Sanctum', shortcut: '4' },
+  { id: 'practice', title: 'The Practice', shortcut: '5' },
+  { id: 'writings', title: 'Field Notes', shortcut: '6' },
+  { id: 'ethos', title: 'Ethos', shortcut: '7' },
 ];
 
 const CodexSidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [activeSection, setActiveSection] = useState<string>('');
-  const { sections: readingSections, progressPercent, isRead } = useReadingProgress();
+  const { sections: readingSections, progressPercent, isRead, resetProgress } = useReadingProgress();
+
+  const scrollToSection = useCallback((sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      const offset = 80;
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - offset;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth',
+      });
+    }
+  }, []);
 
   // Track active section based on scroll position
   useEffect(() => {
@@ -54,18 +70,30 @@ const CodexSidebar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const scrollToSection = (sectionId: string) => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      const offset = 80;
-      const elementPosition = element.getBoundingClientRect().top;
-      const offsetPosition = elementPosition + window.pageYOffset - offset;
+  // Keyboard shortcuts for section navigation (1-7)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't trigger if user is typing in an input
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+        return;
+      }
 
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: 'smooth',
-      });
-    }
+      const key = e.key;
+      if (key >= '1' && key <= '7') {
+        const index = parseInt(key) - 1;
+        if (sections[index]) {
+          scrollToSection(sections[index].id);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [scrollToSection]);
+
+  const handleResetProgress = () => {
+    resetProgress();
+    toast.success('Reading progress has been reset');
   };
 
   // Only show on homepage
@@ -125,7 +153,7 @@ const CodexSidebar = () => {
                   key={section.id}
                   onClick={() => scrollToSection(section.id)}
                   className={cn(
-                    'w-full flex items-center gap-3 px-3 py-2 text-sm rounded-md transition-colors text-left',
+                    'w-full flex items-center gap-3 px-3 py-2 text-sm rounded-md transition-colors text-left group',
                     isActive
                       ? 'bg-primary/10 text-primary'
                       : 'text-muted-foreground hover:text-foreground hover:bg-muted'
@@ -136,16 +164,28 @@ const CodexSidebar = () => {
                   ) : (
                     <Circle size={14} className="flex-shrink-0 opacity-40" />
                   )}
-                  <span className={cn(sectionRead && 'line-through opacity-70')}>
+                  <span className={cn('flex-1', sectionRead && 'line-through opacity-70')}>
                     {section.title}
                   </span>
+                  <kbd className="hidden group-hover:inline-flex h-5 w-5 items-center justify-center rounded border bg-muted text-[10px] font-mono text-muted-foreground">
+                    {section.shortcut}
+                  </kbd>
                 </button>
               );
             })}
           </nav>
 
           {/* Quick Actions */}
-          <div className="pt-4 border-t border-border">
+          <div className="pt-4 border-t border-border space-y-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleResetProgress}
+              className="w-full justify-start gap-2 text-muted-foreground hover:text-foreground"
+            >
+              <RotateCcw size={14} />
+              Reset Progress
+            </Button>
             <a
               href="/glossary"
               className="flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
