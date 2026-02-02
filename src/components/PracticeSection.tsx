@@ -21,7 +21,7 @@ const examples = [
 
 const PracticeSection = () => {
   return (
-    <section className="section-spacing border-t divider bg-card">
+    <section id="practice" className="section-spacing border-t divider bg-card">
       <div className="container-wide">
         <FadeInSection>
           <div className="container-reading mx-auto mb-16">

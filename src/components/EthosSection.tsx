@@ -2,6 +2,7 @@ import { useState } from 'react';
 import FadeInSection from './FadeInSection';
 import CollapsibleSection from './CollapsibleSection';
 import SectionBookmarkButton from './SectionBookmarkButton';
+import SectionShareButton from './SectionShareButton';
 
 const values = [
   {
@@ -105,11 +106,14 @@ const EthosSection = () => {
                 Ethos
               </h2>
             </div>
-            <SectionBookmarkButton 
-              sectionId="ethos" 
-              sectionTitle="Ethos" 
-              parentSection="Core Framework" 
-            />
+            <div className="flex items-center gap-1">
+              <SectionShareButton sectionId="ethos" sectionTitle="Ethos" />
+              <SectionBookmarkButton 
+                sectionId="ethos" 
+                sectionTitle="Ethos" 
+                parentSection="Core Framework" 
+              />
+            </div>
           </div>
           <p className="prose-codex text-muted-foreground mb-12">
             These are not rules to follow but orientations to embody. They emerge 

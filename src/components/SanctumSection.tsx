@@ -1,6 +1,7 @@
 import FadeInSection from './FadeInSection';
 import CollapsibleSection from './CollapsibleSection';
 import SectionBookmarkButton from './SectionBookmarkButton';
+import SectionShareButton from './SectionShareButton';
 
 const functions = [
   {
@@ -42,7 +43,7 @@ const guardrails = [
 
 const SanctumSection = () => {
   return (
-    <section className="section-spacing border-t divider">
+    <section id="sanctum" className="section-spacing border-t divider">
       <div className="container-reading">
         <FadeInSection>
           <div className="flex items-start justify-between">
@@ -54,11 +55,14 @@ const SanctumSection = () => {
                 Atlas Sanctum
               </h2>
             </div>
-            <SectionBookmarkButton 
-              sectionId="sanctum" 
-              sectionTitle="Atlas Sanctum" 
-              parentSection="Physical Sites" 
-            />
+              <div className="flex items-center gap-1">
+                <SectionShareButton sectionId="sanctum" sectionTitle="Atlas Sanctum" />
+                <SectionBookmarkButton 
+                  sectionId="sanctum" 
+                  sectionTitle="Atlas Sanctum" 
+                  parentSection="Physical Sites" 
+                />
+              </div>
           </div>
         </FadeInSection>
         

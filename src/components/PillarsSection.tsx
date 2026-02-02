@@ -5,6 +5,7 @@ import diagramMoral from '@/assets/diagram-moral.png';
 import FadeInSection from './FadeInSection';
 import CollapsibleSection from './CollapsibleSection';
 import SectionBookmarkButton from './SectionBookmarkButton';
+import SectionShareButton from './SectionShareButton';
 
 const pillars = [
   {
@@ -159,11 +160,14 @@ const PillarsSection = () => {
                   The Four Pillars
                 </h2>
               </div>
-              <SectionBookmarkButton 
-                sectionId="pillars" 
-                sectionTitle="The Four Pillars" 
-                parentSection="Core Framework" 
-              />
+              <div className="flex items-center gap-1">
+                <SectionShareButton sectionId="pillars" sectionTitle="The Four Pillars" />
+                <SectionBookmarkButton 
+                  sectionId="pillars" 
+                  sectionTitle="The Four Pillars" 
+                  parentSection="Core Framework" 
+                />
+              </div>
             </div>
             <p className="prose-codex">
               The Codex rests on four foundational pillars—not as separate domains, 

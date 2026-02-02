@@ -1,6 +1,7 @@
 import { Download } from 'lucide-react';
 import FadeInSection from './FadeInSection';
 import SectionBookmarkButton from './SectionBookmarkButton';
+import SectionShareButton from './SectionShareButton';
 
 const CodexSection = () => {
   const handleDownloadPDF = () => {
@@ -177,11 +178,14 @@ const CodexSection = () => {
                 The Codex
               </h2>
             </div>
-            <SectionBookmarkButton 
-              sectionId="codex" 
-              sectionTitle="The Codex" 
-              parentSection="Core Framework" 
-            />
+            <div className="flex items-center gap-1">
+              <SectionShareButton sectionId="codex" sectionTitle="The Codex" />
+              <SectionBookmarkButton 
+                sectionId="codex" 
+                sectionTitle="The Codex" 
+                parentSection="Core Framework" 
+              />
+            </div>
           </div>
         </FadeInSection>
         
