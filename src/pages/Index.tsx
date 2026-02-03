@@ -13,6 +13,7 @@ import ContactSection from "@/components/ContactSection";
 import PartnersCarousel from "@/components/PartnersCarousel";
 import Footer from "@/components/Footer";
 import CodexSidebar from "@/components/CodexSidebar";
+import ContinueReadingPrompt from "@/components/ContinueReadingPrompt";
 import { useScrollReadingDetection } from "@/hooks/useScrollReadingDetection";
 
 const Index = () => {
@@ -44,6 +45,7 @@ const Index = () => {
     <div className="min-h-screen">
       <Navigation />
       <CodexSidebar />
+      <ContinueReadingPrompt />
       <main>
         <HeroSection />
         <CodexSection />
