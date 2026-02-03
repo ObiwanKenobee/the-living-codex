@@ -3,6 +3,16 @@ import CollapsibleSection from './CollapsibleSection';
 import HabitatTimeline from './HabitatTimeline';
 import SectionBookmarkButton from './SectionBookmarkButton';
 import SectionShareButton from './SectionShareButton';
+import SectionTableOfContents from './SectionTableOfContents';
+
+const habitatTocItems = [
+  { id: 'habitat-intro', title: 'Introduction' },
+  { id: 'habitat-philosophy', title: 'Site Philosophy' },
+  { id: 'habitat-focus', title: 'Current Focus Areas' },
+  { id: 'habitat-principles', title: 'Operating Principles' },
+  { id: 'habitat-timescales', title: 'On Timescales' },
+  { id: 'habitat-timeline', title: 'Development Timeline' },
+];
 
 const focusAreas = [
   {
@@ -61,7 +71,9 @@ const HabitatSection = () => {
         </FadeInSection>
         
         <FadeInSection delay={100}>
-          <div className="prose-codex space-y-6">
+          <SectionTableOfContents items={habitatTocItems} className="mb-8" />
+          
+          <div id="habitat-intro" className="prose-codex space-y-6">
             <p>
               The Codex cannot remain theoretical. It must be tested against 
               reality—against soil, weather, community, time, and the countless 
@@ -82,7 +94,7 @@ const HabitatSection = () => {
               listening.
             </p>
 
-            <div className="mt-8 pt-8 border-t divider">
+            <div id="habitat-philosophy" className="mt-8 pt-8 border-t divider">
               <h3 className="text-xl font-medium mb-4">Site Philosophy</h3>
               <p className="text-muted-foreground">
                 Every landscape has a genius—a pattern of flows, relationships, and 
@@ -97,7 +109,7 @@ const HabitatSection = () => {
         </FadeInSection>
 
         <FadeInSection delay={200}>
-          <div className="mt-16">
+          <div id="habitat-focus" className="mt-16">
             <h3 className="text-xl font-medium mb-8">Current Focus Areas</h3>
             <div className="space-y-3">
               {focusAreas.map((area, index) => (
@@ -116,7 +128,7 @@ const HabitatSection = () => {
         </FadeInSection>
 
         <FadeInSection delay={300}>
-          <div className="mt-16 p-8 border divider bg-background">
+          <div id="habitat-principles" className="mt-16 p-8 border divider bg-background">
             <h3 className="text-lg font-medium mb-6 text-center">Operating Principles</h3>
             <ul className="space-y-3">
               {principles.map((principle, index) => (
@@ -130,7 +142,7 @@ const HabitatSection = () => {
         </FadeInSection>
 
         <FadeInSection delay={400}>
-          <div className="mt-16 prose-codex">
+          <div id="habitat-timescales" className="mt-16 prose-codex">
             <h3 className="text-xl font-medium mb-4">On Timescales</h3>
             <p className="text-muted-foreground">
               Modern projects measure success in months or quarters. Habitat One operates 
@@ -148,7 +160,9 @@ const HabitatSection = () => {
         </FadeInSection>
 
         <FadeInSection delay={500}>
-          <HabitatTimeline />
+          <div id="habitat-timeline">
+            <HabitatTimeline />
+          </div>
         </FadeInSection>
       </div>
     </section>
