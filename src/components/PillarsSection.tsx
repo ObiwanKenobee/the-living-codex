@@ -6,9 +6,18 @@ import FadeInSection from './FadeInSection';
 import CollapsibleSection from './CollapsibleSection';
 import SectionBookmarkButton from './SectionBookmarkButton';
 import SectionShareButton from './SectionShareButton';
+import SectionTableOfContents from './SectionTableOfContents';
+
+const pillarsTocItems = [
+  { id: 'pillar-mathematical', title: 'Mathematical Principles of Life' },
+  { id: 'pillar-material', title: 'Material Expressions' },
+  { id: 'pillar-human', title: 'Human Systems' },
+  { id: 'pillar-moral', title: 'Moral Architecture' },
+];
 
 const pillars = [
   {
+    id: "pillar-mathematical",
     number: "II.i",
     title: "Mathematical Principles of Life",
     description: `Every living system operates according to patterns that can be 
@@ -43,6 +52,7 @@ const pillars = [
     imageAlt: "Diagram showing growth curves and feedback loop patterns"
   },
   {
+    id: "pillar-material",
     number: "II.ii",
     title: "Material Expressions",
     description: `The physical world is the ground of all systems. Soil, water, 
@@ -76,6 +86,7 @@ const pillars = [
     imageAlt: "Cross-section diagram of soil layers and root systems"
   },
   {
+    id: "pillar-human",
     number: "II.iii",
     title: "Human Systems",
     description: `Communities, education, work, meaning—these are not separate 
@@ -110,6 +121,7 @@ const pillars = [
     imageAlt: "Network diagram showing interconnected community relationships"
   },
   {
+    id: "pillar-moral",
     number: "II.iv",
     title: "Moral Architecture",
     description: `Ethics is not separate from physics. How we treat the systems 
@@ -173,6 +185,7 @@ const PillarsSection = () => {
               The Codex rests on four foundational pillars—not as separate domains, 
               but as four perspectives on the same underlying reality.
             </p>
+            <SectionTableOfContents items={pillarsTocItems} className="mt-8" />
           </div>
         </FadeInSection>
 
@@ -180,6 +193,7 @@ const PillarsSection = () => {
           {pillars.map((pillar, index) => (
             <FadeInSection key={pillar.number} delay={index * 100}>
               <article 
+                id={pillar.id}
                 className={`grid lg:grid-cols-2 gap-12 lg:gap-16 items-center ${
                   index % 2 === 1 ? 'lg:flex-row-reverse' : ''
                 }`}

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { BookOpen, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useContinueReading } from '@/hooks/useContinueReading';
@@ -18,6 +18,18 @@ const ContinueReadingPrompt = () => {
   const { savedPosition, showPrompt, continueReading, dismissPrompt } = useContinueReading();
   const [isVisible, setIsVisible] = useState(false);
 
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    if (!showPrompt) return;
+    
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      dismissPrompt();
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      continueReading();
+    }
+  }, [showPrompt, dismissPrompt, continueReading]);
+
   useEffect(() => {
     if (showPrompt) {
       // Delay showing to avoid flashing on page load
@@ -27,6 +39,11 @@ const ContinueReadingPrompt = () => {
       setIsVisible(false);
     }
   }, [showPrompt]);
+
+  useEffect(() => {
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [handleKeyDown]);
 
   if (!showPrompt || !savedPosition) return null;
 

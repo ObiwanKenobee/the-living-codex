@@ -2,6 +2,13 @@ import { Download } from 'lucide-react';
 import FadeInSection from './FadeInSection';
 import SectionBookmarkButton from './SectionBookmarkButton';
 import SectionShareButton from './SectionShareButton';
+import SectionTableOfContents from './SectionTableOfContents';
+
+const codexTocItems = [
+  { id: 'codex-nature', title: 'Nature of the Codex' },
+  { id: 'codex-precedes', title: 'What the Codex Precedes' },
+  { id: 'codex-living', title: 'A Living Reference' },
+];
 
 const CodexSection = () => {
   const handleDownloadPDF = () => {
@@ -190,27 +197,35 @@ const CodexSection = () => {
         </FadeInSection>
         
         <FadeInSection delay={100}>
+          <SectionTableOfContents items={codexTocItems} className="mb-8" />
+          
           <div className="prose-codex space-y-6">
-            <p>
-              The Atlas Codex is not an invention in the ordinary sense. It is an 
-              attempt to describe what already exists—the underlying patterns by 
-              which living systems organize themselves, persist through time, and 
-              either flourish or collapse.
-            </p>
+            <div id="codex-nature">
+              <p>
+                The Atlas Codex is not an invention in the ordinary sense. It is an 
+                attempt to describe what already exists—the underlying patterns by 
+                which living systems organize themselves, persist through time, and 
+                either flourish or collapse.
+              </p>
+            </div>
             
-            <p>
-              It precedes institutions, technologies, and economies. These are 
-              expressions of deeper principles, not their source. The Codex seeks 
-              to articulate those principles in mathematical and ethical terms, 
-              grounded in observation rather than ideology.
-            </p>
+            <div id="codex-precedes">
+              <p>
+                It precedes institutions, technologies, and economies. These are 
+                expressions of deeper principles, not their source. The Codex seeks 
+                to articulate those principles in mathematical and ethical terms, 
+                grounded in observation rather than ideology.
+              </p>
+            </div>
             
-            <p>
-              This is a living reference. It evolves through careful observation, 
-              physical experimentation, and the humility to be wrong. What is 
-              written here today may be refined tomorrow as our understanding 
-              deepens through reality-testing.
-            </p>
+            <div id="codex-living">
+              <p>
+                This is a living reference. It evolves through careful observation, 
+                physical experimentation, and the humility to be wrong. What is 
+                written here today may be refined tomorrow as our understanding 
+                deepens through reality-testing.
+              </p>
+            </div>
           </div>
         </FadeInSection>
 
