@@ -1,17 +1,17 @@
-import { useEffect, useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, Calendar, MapPin, LogOut, User, Heart, Clock } from 'lucide-react';
-import { format, isPast } from 'date-fns';
+ import { useEffect, useState } from 'react';
+ import { useNavigate } from 'react-router-dom';
+ import { useQuery } from '@tanstack/react-query';
+ import { isPast } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useEventFavorites } from '@/hooks/useEventFavorites';
-import Navigation from '@/components/Navigation';
-import Footer from '@/components/Footer';
-import FadeInSection from '@/components/FadeInSection';
-import ProfileEditor from '@/components/ProfileEditor';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+ import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
+ import DashboardOverview from '@/components/dashboard/DashboardOverview';
+ import DashboardEvents from '@/components/dashboard/DashboardEvents';
+ import DashboardFavorites from '@/components/dashboard/DashboardFavorites';
+ import DashboardProfile from '@/components/dashboard/DashboardProfile';
+ import DashboardNotifications from '@/components/dashboard/DashboardNotifications';
+ import DashboardSettings from '@/components/dashboard/DashboardSettings';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 interface Event {
@@ -27,10 +27,11 @@ interface Event {
 const DashboardPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const queryClient = useQueryClient();
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const { favorites, removeFavorite } = useEventFavorites();
+   const [activeTab, setActiveTab] = useState('overview');
+   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+   const { favorites, removeFavorite } = useEventFavorites();
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -125,16 +126,22 @@ const DashboardPage = () => {
   };
 
   const upcomingRegistrations = registrations?.filter(
-    r => r.events && !isPast(new Date(r.events.start_date))
+     (r: any) => r.events && !isPast(new Date(r.events.start_date))
   ) || [];
 
   const pastRegistrations = registrations?.filter(
-    r => r.events && isPast(new Date(r.events.start_date))
+     (r: any) => r.events && isPast(new Date(r.events.start_date))
   ) || [];
 
   const upcomingFavorites = favoriteEvents?.filter(
-    e => !isPast(new Date(e.start_date))
+     (e: Event) => !isPast(new Date(e.start_date))
   ) || [];
+
+   const stats = {
+     upcomingEvents: upcomingRegistrations.length,
+     savedEvents: upcomingFavorites.length,
+     pastEvents: pastRegistrations.length,
+   };
 
   if (isLoading) {
     return (
@@ -144,244 +151,78 @@ const DashboardPage = () => {
     );
   }
 
+   const renderContent = () => {
+     switch (activeTab) {
+       case 'overview':
+         return (
+           <DashboardOverview
+             upcomingRegistrations={upcomingRegistrations}
+             pastRegistrations={pastRegistrations}
+             savedEvents={upcomingFavorites}
+             onNavigate={setActiveTab}
+           />
+         );
+       case 'events':
+         return (
+           <DashboardEvents
+             upcomingRegistrations={upcomingRegistrations}
+             pastRegistrations={pastRegistrations}
+           />
+         );
+       case 'favorites':
+         return (
+           <DashboardFavorites
+             savedEvents={upcomingFavorites}
+             onRemoveFavorite={removeFavorite}
+           />
+         );
+       case 'profile':
+         return (
+           <DashboardProfile
+             profile={profile}
+             userEmail={user?.email || ''}
+             stats={stats}
+             onProfileUpdate={() => refetchProfile()}
+           />
+         );
+       case 'notifications':
+         return <DashboardNotifications />;
+       case 'settings':
+         return <DashboardSettings />;
+       default:
+         return (
+           <DashboardOverview
+             upcomingRegistrations={upcomingRegistrations}
+             pastRegistrations={pastRegistrations}
+             savedEvents={upcomingFavorites}
+             onNavigate={setActiveTab}
+           />
+         );
+     }
+   };
+
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <Navigation />
-      
-      <main className="py-20">
-        <div className="container-wide">
-          <FadeInSection>
-            <Link 
-              to="/" 
-              className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-12 font-sans-nav text-xs tracking-wider"
-            >
-              <ArrowLeft size={14} />
-              Return to Codex
-            </Link>
-
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-12">
-              <div>
-                <h1 className="text-3xl md:text-4xl font-light mb-2">Your Dashboard</h1>
-                <p className="text-muted-foreground">
-                  Welcome back, {profile?.full_name || user?.email}
-                </p>
-              </div>
-              <Button 
-                variant="outline" 
-                onClick={handleSignOut}
-                className="self-start flex items-center gap-2"
-              >
-                <LogOut size={16} />
-                Sign Out
-              </Button>
-            </div>
-          </FadeInSection>
-
-          <FadeInSection delay={50}>
-            <Tabs defaultValue="events" className="w-full">
-              <TabsList className="mb-8">
-                <TabsTrigger value="events">My Events</TabsTrigger>
-                <TabsTrigger value="favorites">
-                  Saved Events
-                  {upcomingFavorites.length > 0 && (
-                    <span className="ml-2 px-1.5 py-0.5 text-xs bg-primary/10 text-primary rounded">
-                      {upcomingFavorites.length}
-                    </span>
-                  )}
-                </TabsTrigger>
-                <TabsTrigger value="profile">Profile</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="events">
-                <div className="space-y-12">
-                  {/* Upcoming Events */}
-                  <section>
-                    <h2 className="text-xl font-light mb-6">Upcoming Events</h2>
-                    {upcomingRegistrations.length === 0 ? (
-                      <div className="p-8 border divider bg-card text-center">
-                        <p className="text-muted-foreground mb-4">
-                          You haven't registered for any upcoming events.
-                        </p>
-                        <Link to="/events">
-                          <Button variant="outline">Browse Events</Button>
-                        </Link>
-                      </div>
-                    ) : (
-                      <div className="grid gap-4">
-                        {upcomingRegistrations.map((reg) => (
-                          <div 
-                            key={reg.id}
-                            className="p-6 border divider bg-card"
-                          >
-                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                              <div>
-                                <h3 className="text-lg font-light mb-2">
-                                  {reg.events?.title}
-                                </h3>
-                                <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-                                  <span className="flex items-center gap-1">
-                                    <Calendar size={14} />
-                                    {reg.events && format(new Date(reg.events.start_date), 'MMM d, yyyy')}
-                                  </span>
-                                  {reg.events?.location && (
-                                    <span className="flex items-center gap-1">
-                                      <MapPin size={14} />
-                                      {reg.events.location}
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
-                              <span className="text-xs font-sans-nav text-primary bg-primary/10 px-3 py-1 self-start">
-                                Registered
-                              </span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </section>
-
-                  {/* Past Events */}
-                  {pastRegistrations.length > 0 && (
-                    <section>
-                      <h2 className="text-xl font-light mb-6 text-muted-foreground">Past Events</h2>
-                      <div className="grid gap-4">
-                        {pastRegistrations.map((reg) => (
-                          <div 
-                            key={reg.id}
-                            className="p-4 border divider bg-card/50 opacity-70"
-                          >
-                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
-                              <div>
-                                <h3 className="font-light">{reg.events?.title}</h3>
-                                <p className="text-sm text-muted-foreground">
-                                  {reg.events && format(new Date(reg.events.start_date), 'MMMM d, yyyy')}
-                                </p>
-                              </div>
-                              <span className="text-xs font-sans-nav text-muted-foreground">
-                                Attended
-                              </span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </section>
-                  )}
-                </div>
-              </TabsContent>
-
-              <TabsContent value="favorites">
-                <div className="space-y-6">
-                  <h2 className="text-xl font-light">Saved Events</h2>
-                  {upcomingFavorites.length === 0 ? (
-                    <div className="p-8 border divider bg-card text-center">
-                      <Heart className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                      <p className="text-muted-foreground mb-4">
-                        You haven't saved any events yet. Browse events and click the heart icon to save them here.
-                      </p>
-                      <Link to="/events">
-                        <Button variant="outline">Browse Events</Button>
-                      </Link>
-                    </div>
-                  ) : (
-                    <div className="grid gap-4">
-                      {upcomingFavorites.map((event) => (
-                        <div 
-                          key={event.id}
-                          className="p-6 border divider bg-card"
-                        >
-                          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                            <div>
-                              <h3 className="text-lg font-light mb-2">{event.title}</h3>
-                              <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-                                <span className="flex items-center gap-1">
-                                  <Calendar size={14} />
-                                  {format(new Date(event.start_date), 'MMM d, yyyy')}
-                                </span>
-                                <span className="flex items-center gap-1">
-                                  <Clock size={14} />
-                                  {format(new Date(event.start_date), 'h:mm a')}
-                                </span>
-                                {event.location && (
-                                  <span className="flex items-center gap-1">
-                                    <MapPin size={14} />
-                                    {event.location}
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                            <div className="flex gap-2 self-start">
-                              <Link to="/events">
-                                <Button variant="outline" size="sm">
-                                  View Event
-                                </Button>
-                              </Link>
-                              <Button 
-                                variant="ghost" 
-                                size="sm"
-                                onClick={() => removeFavorite(event.id)}
-                                className="text-destructive hover:text-destructive"
-                              >
-                                <Heart size={16} className="fill-current" />
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </TabsContent>
-
-              <TabsContent value="profile">
-                <div className="max-w-lg">
-                  <div className="p-8 border divider bg-card">
-                    <div className="flex items-center gap-4 mb-6">
-                      <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center">
-                        <User size={24} className="text-muted-foreground" />
-                      </div>
-                      <div>
-                        <h3 className="text-lg font-light">
-                          {profile?.full_name || 'Your Name'}
-                        </h3>
-                        <p className="text-sm text-muted-foreground">{user?.email}</p>
-                      </div>
-                    </div>
-
-                    <div className="space-y-4 text-sm">
-                      <div className="flex justify-between py-2 border-b divider">
-                        <span className="text-muted-foreground">Member since</span>
-                        <span>{profile && format(new Date(profile.created_at), 'MMMM yyyy')}</span>
-                      </div>
-                      <div className="flex justify-between py-2 border-b divider">
-                        <span className="text-muted-foreground">Events attended</span>
-                        <span>{pastRegistrations.length}</span>
-                      </div>
-                      <div className="flex justify-between py-2 border-b divider">
-                        <span className="text-muted-foreground">Upcoming events</span>
-                        <span>{upcomingRegistrations.length}</span>
-                      </div>
-                      <div className="flex justify-between py-2">
-                        <span className="text-muted-foreground">Saved events</span>
-                        <span>{upcomingFavorites.length}</span>
-                      </div>
-                    </div>
-
-                    {profile && (
-                      <ProfileEditor 
-                        profile={profile} 
-                        onUpdate={() => refetchProfile()} 
-                      />
-                    )}
-                  </div>
-                </div>
-              </TabsContent>
-            </Tabs>
-          </FadeInSection>
+     <div className="min-h-screen bg-background text-foreground">
+       <DashboardSidebar
+         collapsed={sidebarCollapsed}
+         onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
+         userName={profile?.full_name || 'User'}
+         userEmail={user?.email || ''}
+         activeTab={activeTab}
+         onTabChange={setActiveTab}
+         onSignOut={handleSignOut}
+         stats={stats}
+       />
+       
+       <main 
+         className={`min-h-screen transition-all duration-300 ${
+           sidebarCollapsed ? 'ml-16' : 'ml-64'
+         }`}
+       >
+         <div className="p-6 md:p-8 lg:p-10 max-w-7xl">
+           {renderContent()}
         </div>
       </main>
-
-      <Footer />
     </div>
   );
 };
