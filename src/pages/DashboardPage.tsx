@@ -1,17 +1,20 @@
- import { useEffect, useState } from 'react';
- import { useNavigate } from 'react-router-dom';
- import { useQuery } from '@tanstack/react-query';
- import { isPast } from 'date-fns';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { isPast } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useEventFavorites } from '@/hooks/useEventFavorites';
- import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
- import DashboardOverview from '@/components/dashboard/DashboardOverview';
- import DashboardEvents from '@/components/dashboard/DashboardEvents';
- import DashboardFavorites from '@/components/dashboard/DashboardFavorites';
- import DashboardProfile from '@/components/dashboard/DashboardProfile';
- import DashboardNotifications from '@/components/dashboard/DashboardNotifications';
- import DashboardSettings from '@/components/dashboard/DashboardSettings';
+import { useUserNotifications } from '@/hooks/useUserNotifications';
+import { useIsMobile } from '@/hooks/use-mobile';
+import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
+import DashboardMobileNav from '@/components/dashboard/DashboardMobileNav';
+import DashboardOverview from '@/components/dashboard/DashboardOverview';
+import DashboardEvents from '@/components/dashboard/DashboardEvents';
+import DashboardFavorites from '@/components/dashboard/DashboardFavorites';
+import DashboardProfile from '@/components/dashboard/DashboardProfile';
+import DashboardNotifications from '@/components/dashboard/DashboardNotifications';
+import DashboardSettings from '@/components/dashboard/DashboardSettings';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 interface Event {
@@ -29,9 +32,11 @@ const DashboardPage = () => {
   const { toast } = useToast();
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-   const [activeTab, setActiveTab] = useState('overview');
-   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-   const { favorites, removeFavorite } = useEventFavorites();
+  const [activeTab, setActiveTab] = useState('overview');
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const { favorites, removeFavorite } = useEventFavorites();
+  const { unreadCount } = useUserNotifications(user?.id);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -185,10 +190,10 @@ const DashboardPage = () => {
              onProfileUpdate={() => refetchProfile()}
            />
          );
-       case 'notifications':
-         return <DashboardNotifications />;
-       case 'settings':
-         return <DashboardSettings />;
+        case 'notifications':
+          return <DashboardNotifications userId={user?.id} />;
+        case 'settings':
+          return <DashboardSettings userId={user?.id} />;
        default:
          return (
            <DashboardOverview
@@ -202,27 +207,39 @@ const DashboardPage = () => {
    };
 
   return (
-     <div className="min-h-screen bg-background text-foreground">
-       <DashboardSidebar
-         collapsed={sidebarCollapsed}
-         onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
-         userName={profile?.full_name || 'User'}
-         userEmail={user?.email || ''}
-         activeTab={activeTab}
-         onTabChange={setActiveTab}
-         onSignOut={handleSignOut}
-         stats={stats}
-       />
-       
-       <main 
-         className={`min-h-screen transition-all duration-300 ${
-           sidebarCollapsed ? 'ml-16' : 'ml-64'
-         }`}
-       >
-         <div className="p-6 md:p-8 lg:p-10 max-w-7xl">
-           {renderContent()}
+    <div className="min-h-screen bg-background text-foreground">
+      {/* Desktop Sidebar - hidden on mobile */}
+      {!isMobile && (
+        <DashboardSidebar
+          collapsed={sidebarCollapsed}
+          onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
+          userName={profile?.full_name || 'User'}
+          userEmail={user?.email || ''}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          onSignOut={handleSignOut}
+          stats={stats}
+        />
+      )}
+      
+      <main 
+        className={`min-h-screen transition-all duration-300 ${
+          isMobile ? 'ml-0 pb-20' : sidebarCollapsed ? 'ml-16' : 'ml-64'
+        }`}
+      >
+        <div className="p-4 md:p-6 lg:p-8 xl:p-10 max-w-7xl">
+          {renderContent()}
         </div>
       </main>
+
+      {/* Mobile Bottom Navigation */}
+      {isMobile && (
+        <DashboardMobileNav
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          notificationCount={unreadCount}
+        />
+      )}
     </div>
   );
 };
