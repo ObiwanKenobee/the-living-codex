@@ -7,6 +7,8 @@ import { useToast } from '@/hooks/use-toast';
 import { useEventFavorites } from '@/hooks/useEventFavorites';
 import { useUserNotifications } from '@/hooks/useUserNotifications';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useUserRole } from '@/hooks/useUserRole';
+import { useActivityLog } from '@/hooks/useActivityLog';
 import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
 import DashboardMobileNav from '@/components/dashboard/DashboardMobileNav';
 import DashboardOverview from '@/components/dashboard/DashboardOverview';
@@ -15,6 +17,8 @@ import DashboardFavorites from '@/components/dashboard/DashboardFavorites';
 import DashboardProfile from '@/components/dashboard/DashboardProfile';
 import DashboardNotifications from '@/components/dashboard/DashboardNotifications';
 import DashboardSettings from '@/components/dashboard/DashboardSettings';
+import DashboardActivityFeed from '@/components/dashboard/DashboardActivityFeed';
+import DashboardCommandPalette from '@/components/dashboard/DashboardCommandPalette';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 interface Event {
@@ -33,10 +37,20 @@ const DashboardPage = () => {
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
+  
+  const handleTabChange = (tab: string) => {
+    if (tab === 'admin') {
+      navigate('/admin');
+      return;
+    }
+    setActiveTab(tab);
+  };
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const { favorites, removeFavorite } = useEventFavorites();
   const { unreadCount } = useUserNotifications(user?.id);
   const isMobile = useIsMobile();
+  const { isAdmin } = useUserRole(user?.id);
+  const { logActivity } = useActivityLog(user?.id);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -46,6 +60,10 @@ const DashboardPage = () => {
         } else {
           setUser(session.user);
           setIsLoading(false);
+          logActivity({
+            action: 'auth.login',
+            entity_type: 'session',
+          });
         }
       }
     );
@@ -164,7 +182,7 @@ const DashboardPage = () => {
              upcomingRegistrations={upcomingRegistrations}
              pastRegistrations={pastRegistrations}
              savedEvents={upcomingFavorites}
-             onNavigate={setActiveTab}
+              onNavigate={handleTabChange}
            />
          );
        case 'events':
@@ -192,6 +210,8 @@ const DashboardPage = () => {
          );
         case 'notifications':
           return <DashboardNotifications userId={user?.id} />;
+        case 'activity':
+          return <DashboardActivityFeed userId={user?.id} limit={50} />;
         case 'settings':
           return <DashboardSettings userId={user?.id} />;
        default:
@@ -200,7 +220,7 @@ const DashboardPage = () => {
              upcomingRegistrations={upcomingRegistrations}
              pastRegistrations={pastRegistrations}
              savedEvents={upcomingFavorites}
-             onNavigate={setActiveTab}
+             onNavigate={handleTabChange}
            />
          );
      }
@@ -208,6 +228,13 @@ const DashboardPage = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      {/* Command Palette */}
+      <DashboardCommandPalette
+        onNavigate={handleTabChange}
+        onSignOut={handleSignOut}
+        isAdmin={isAdmin}
+      />
+
       {/* Desktop Sidebar - hidden on mobile */}
       {!isMobile && (
         <DashboardSidebar
@@ -216,9 +243,10 @@ const DashboardPage = () => {
           userName={profile?.full_name || 'User'}
           userEmail={user?.email || ''}
           activeTab={activeTab}
-          onTabChange={setActiveTab}
+          onTabChange={handleTabChange}
           onSignOut={handleSignOut}
           stats={stats}
+          isAdmin={isAdmin}
         />
       )}
       
@@ -236,7 +264,7 @@ const DashboardPage = () => {
       {isMobile && (
         <DashboardMobileNav
           activeTab={activeTab}
-          onTabChange={setActiveTab}
+          onTabChange={handleTabChange}
           notificationCount={unreadCount}
         />
       )}

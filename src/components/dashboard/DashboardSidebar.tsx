@@ -10,7 +10,9 @@
    HelpCircle,
    LogOut,
    ChevronLeft,
-   ChevronRight
+   ChevronRight,
+   FileText,
+   Shield
  } from 'lucide-react';
  import { cn } from '@/lib/utils';
  import { Button } from '@/components/ui/button';
@@ -30,6 +32,7 @@
    activeTab: string;
    onTabChange: (tab: string) => void;
    onSignOut: () => void;
+   isAdmin?: boolean;
    stats: {
      upcomingEvents: number;
      savedEvents: number;
@@ -42,6 +45,7 @@
    { id: 'events', label: 'My Events', icon: Calendar },
    { id: 'favorites', label: 'Saved Events', icon: Heart },
    { id: 'notifications', label: 'Notifications', icon: Bell },
+   { id: 'activity', label: 'Activity', icon: FileText },
  ];
  
  const secondaryNavItems = [
@@ -57,6 +61,7 @@
    activeTab,
    onTabChange,
    onSignOut,
+   isAdmin,
    stats,
  }: DashboardSidebarProps) => {
    const getInitials = (name: string) => {
@@ -190,25 +195,49 @@
                Main
              </p>
            )}
-           <NavItem item={mainNavItems[0]} />
-           <NavItem item={mainNavItems[1]} badge={stats.upcomingEvents} />
-           <NavItem item={mainNavItems[2]} badge={stats.savedEvents} />
-           <NavItem item={mainNavItems[3]} />
-         </div>
- 
-         <Separator className="my-4" />
- 
-         <div className="space-y-1">
-           {!collapsed && (
-             <p className="px-3 py-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">
-               Account
-             </p>
-           )}
-           {secondaryNavItems.map((item) => (
-             <NavItem key={item.id} item={item} />
-           ))}
-         </div>
-       </nav>
+            <NavItem item={mainNavItems[0]} />
+            <NavItem item={mainNavItems[1]} badge={stats.upcomingEvents} />
+            <NavItem item={mainNavItems[2]} badge={stats.savedEvents} />
+            <NavItem item={mainNavItems[3]} />
+            <NavItem item={mainNavItems[4]} />
+          </div>
+
+          {isAdmin && (
+            <>
+              <Separator className="my-4" />
+              <div className="space-y-1">
+                {!collapsed && (
+                  <p className="px-3 py-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    Admin
+                  </p>
+                )}
+                <NavItem item={{ id: 'admin', label: 'Admin Panel', icon: Shield }} />
+              </div>
+            </>
+          )}
+
+          <Separator className="my-4" />
+
+          <div className="space-y-1">
+            {!collapsed && (
+              <p className="px-3 py-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                Account
+              </p>
+            )}
+            {secondaryNavItems.map((item) => (
+              <NavItem key={item.id} item={item} />
+            ))}
+          </div>
+
+          {/* Command palette hint */}
+          {!collapsed && (
+            <div className="mt-4 px-3">
+              <p className="text-xs text-muted-foreground">
+                Press <kbd className="px-1.5 py-0.5 text-[10px] bg-muted rounded border border-border font-mono">⌘K</kbd> for commands
+              </p>
+            </div>
+          )}
+        </nav>
  
        {/* Footer */}
        <div className="p-3 border-t border-border space-y-1">
